@@ -5,16 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "npx serve public -p 3000",
-    "preview": "npx serve public -p 4000",
-    "build": "echo 'Static site — no build step'",
-    "deploy:cf": "npx wrangler pages deploy public --project-name=salon-dashboard",
-    "deploy:vercel": "npx vercel --prod"
+    "preview": "npx serve public -p 4000"
   },
-  "keywords": ["dashboard", "salon", "arabic", "bilingual", "offline-first", "pwa", "pin-auth"],
+  "keywords": ["dashboard", "salon", "arabic", "bilingual", "offline-first", "pwa"],
   "license": "MIT",
-  "engines": { "node": ">=18.0.0" },
-  "devDependencies": {
-    "serve": "^14.2.3",
-    "wrangler": "^4.0.0"
-  }
+  "engines": { "node": ">=18.0.0" }
 }

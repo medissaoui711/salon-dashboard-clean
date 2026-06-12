@@ -13,23 +13,30 @@ concurrency:
 
 jobs:
 
+  # ── 1. Validate ──────────────────────────────────────────────
   validate:
     name: ✅ Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check public/index.html exists and has content
-        run: |
-          [ -f public/index.html ] || (echo "❌ index.html missing" && exit 1)
-          SIZE=$(wc -c < public/index.html)
-          [ "$SIZE" -gt 50000 ] || (echo "❌ File too small: ${SIZE} bytes" && exit 1)
-          echo "✅ index.html OK — ${SIZE} bytes"
+
       - name: Check all required pages exist
         run: |
-          for f in login.html admin.html support.html faq.html privacy.html; do
-            [ -f "public/$f" ] && echo "✅ $f" || (echo "❌ $f missing" && exit 1)
+          for f in index.html login.html admin.html support.html faq.html privacy.html; do
+            if [ -f "public/$f" ]; then
+              echo "✅ $f ($(wc -c < public/$f) bytes)"
+            else
+              echo "❌ $f missing" && exit 1
+            fi
           done
 
+      - name: Check index.html is not empty
+        run: |
+          SIZE=$(wc -c < public/index.html)
+          [ "$SIZE" -gt 50000 ] || (echo "❌ index.html too small: ${SIZE}" && exit 1)
+          echo "✅ index.html size OK: ${SIZE} bytes"
+
+  # ── 2. Deploy to Cloudflare Pages ────────────────────────────
   deploy-cloudflare:
     name: ☁️ Cloudflare Pages
     runs-on: ubuntu-latest
@@ -40,7 +47,8 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to Cloudflare Pages
+
+      - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
@@ -49,6 +57,7 @@ jobs:
           directory: public
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
+  # ── 3. Deploy to Vercel ──────────────────────────────────────
   deploy-vercel:
     name: ▲ Vercel
     runs-on: ubuntu-latest
@@ -56,13 +65,18 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install -g vercel@latest
-      - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Deploy to Vercel
+        run: |
+          npm install -g vercel@latest
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  # ── 4. Preview on PRs ────────────────────────────────────────
   preview:
     name: 🔍 Preview (PR)
     runs-on: ubuntu-latest
@@ -73,7 +87,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy Preview
+
+      - name: Deploy Preview to Cloudflare
         uses: cloudflare/pages-action@v1
         id: cf
         with:
@@ -82,7 +97,8 @@ jobs:
           projectName: salon-dashboard
           directory: public
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-      - name: Comment Preview URL
+
+      - name: Comment Preview URL on PR
         uses: actions/github-script@v7
         with:
           script: |
@@ -90,5 +106,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🔍 Preview Ready\n| ☁️ Cloudflare | ${{ steps.cf.outputs.url }} |\n|---|---|\n_Commit: \`${{ github.sha }}\`_`
+              body: `## 🔍 Preview Ready\n\n| ☁️ Cloudflare | ${{ steps.cf.outputs.url }} |\n|---|---|\n\n_Commit: \`${{ github.sha }}\`_`
             })
