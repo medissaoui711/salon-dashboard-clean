@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<title>الأسئلة الشائعة | FAQ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#252838;--border:#2e3248;--accent:#4f6ef7;--green:#10b981;--text:#e2e8f0;--muted:#64748b;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Arial,sans-serif;}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:10px;height:52px;}
+.back{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;text-decoration:none;}
+.back:hover{border-color:var(--accent);color:var(--accent);}
+.container{max-width:680px;margin:0 auto;padding:24px 16px;}
+.hero{text-align:center;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:22px;}
+.hero h1{font-size:22px;font-weight:800;margin:10px 0 6px;}
+.hero p{font-size:13px;color:var(--muted);}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14px;user-select:none;}
+.faq-q:hover{background:var(--surface2);}
+.faq-q .arrow{transition:transform .2s;font-size:12px;color:var(--muted);}
+.faq-a{display:none;padding:0 16px 14px;font-size:13px;color:#cbd5e1;line-height:1.8;border-top:1px solid var(--border);}
+.faq-a.open{display:block;}
+.arrow.open{transform:rotate(180deg);}
+.cat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:20px 0 8px 4px;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="javascript:history.back()" class="back">← رجوع</a>
+  <span style="font-size:15px;font-weight:700;">❓ الأسئلة الشائعة</span>
+</nav>
+<div class="container">
+  <div class="hero">
+    <div style="font-size:44px;">❓</div>
+    <h1>الأسئلة الشائعة</h1>
+    <p>إجابات على أكثر الأسئلة شيوعاً حول استخدام لوحة تحكم الصالون</p>
+  </div>
+
+  <div class="cat-label">🔑 تسجيل الدخول والصلاحيات</div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">ما الفرق بين حساب المدير والكاشير؟<span class="arrow">▼</span></div>
+  <div class="faq-a">المدير يملك صلاحيات كاملة (تعديل كل شيء + تصدير + مشاركة). الكاشير يمكنه فقط إضافة مبيعات ومصروفات يومية، ولا يرى الرواتب أو التقارير الحساسة.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">كيف أحصل على PIN الدخول؟<span class="arrow">▼</span></div>
+  <div class="faq-a">يُعطى PIN من قِبل Admin النظام عبر صفحة admin.html. PIN المدير 6 أرقام، PIN الكاشير 4 أرقام.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">ما الكود الافتراضي للدخول؟<span class="arrow">▼</span></div>
+  <div class="faq-a">المدير: <code style="color:var(--accent);">123456</code> — الكاشير: <code style="color:var(--accent);">0000</code>. يُنصح بتغييرهما من Admin Panel فور أول دخول.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">نسيت PIN. ماذا أفعل؟<span class="arrow">▼</span></div>
+  <div class="faq-a">تواصل مع Admin النظام ليُعيد توليد PIN جديد من صفحة admin.html → PIN Management.</div></div>
+
+  <div class="cat-label">💾 البيانات والتخزين</div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">هل تُحفظ البيانات تلقائياً؟<span class="arrow">▼</span></div>
+  <div class="faq-a">نعم. كل تعديل يُحفظ فوراً في IndexedDB على جهازك. لا تحتاج لضغط "حفظ".</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">هل يعمل بدون إنترنت؟<span class="arrow">▼</span></div>
+  <div class="faq-a">نعم بالكامل بعد أول تحميل. البيانات محلية 100%. فقط تصدير WhatsApp يحتاج إنترنت.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">كيف أعمل نسخة احتياطية؟<span class="arrow">▼</span></div>
+  <div class="faq-a">من صفحة التقارير → "حفظ نسخة احتياطية" → يُنزَّل ملف JSON. احتفظ به في مكان آمن.</div></div>
+
+  <div class="cat-label">📤 التصدير والمشاركة</div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">كيف أُصدِّر تقرير Excel؟<span class="arrow">▼</span></div>
+  <div class="faq-a">من أي صفحة (مبيعات، رواتب، موظفون) اضغط زر ⬇️ Excel، أو اذهب لصفحة التقارير للتصدير الشامل.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">كيف أُرسل تقريراً عبر WhatsApp؟<span class="arrow">▼</span></div>
+  <div class="faq-a">من صفحة التقارير، أدخل رقم الواتساب (مع رمز الدولة) ثم اضغط زر المشاركة المطلوب. سيُفتح WhatsApp مع نص التقرير جاهزاً.</div></div>
+
+  <div class="cat-label">👥 الموظفون</div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">كيف أُضيف موظفاً جديداً؟<span class="arrow">▼</span></div>
+  <div class="faq-a">صفحة الموظفون → "+ إضافة موظف" → أملأ البيانات (الاسم، الهوية، الشهادة الصحية، الصورة) → حفظ.</div></div>
+
+  <div class="faq-item"><div class="faq-q" onclick="toggle(this)">ما معنى الألوان في انتهاء الهوية؟<span class="arrow">▼</span></div>
+  <div class="faq-a">🟢 أخضر: صالحة. 🟡 أصفر: تنتهي خلال 30 يوم. 🔴 أحمر: منتهية الصلاحية.</div></div>
+
+</div>
+<script>
+function toggle(btn){
+  const ans=btn.nextElementSibling;
+  const arr=btn.querySelector('.arrow');
+  const open=ans.classList.contains('open');
+  document.querySelectorAll('.faq-a.open').forEach(el=>{el.classList.remove('open');el.previousElementSibling.querySelector('.arrow').classList.remove('open');});
+  if(!open){ans.classList.add('open');arr.classList.add('open');}
+}
+</script>
+</body>
+</html>

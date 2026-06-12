@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<title>سياسة الخصوصية | Privacy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3248;--accent:#4f6ef7;--text:#e2e8f0;--muted:#64748b;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Arial,sans-serif;}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:10px;height:52px;}
+.back{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;text-decoration:none;}
+.back:hover{border-color:var(--accent);color:var(--accent);}
+.container{max-width:680px;margin:0 auto;padding:32px 20px;}
+h1{font-size:24px;font-weight:800;margin-bottom:6px;}
+.updated{font-size:12px;color:var(--muted);margin-bottom:28px;}
+h2{font-size:16px;font-weight:700;margin:24px 0 10px;color:var(--accent);}
+p,li{font-size:14px;line-height:1.8;color:#cbd5e1;margin-bottom:8px;}
+ul{padding-inline-start:18px;}
+.highlight{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin:16px 0;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="javascript:history.back()" class="back">← رجوع</a>
+  <span style="font-size:15px;font-weight:700;">🔒 سياسة الخصوصية</span>
+</nav>
+<div class="container">
+  <h1>🔒 سياسة الخصوصية</h1>
+  <p class="updated">آخر تحديث: يونيو 2026</p>
+
+  <div class="highlight">
+    <strong>ملخص سريع:</strong> لوحة تحكم الصالون تعمل بالكامل محلياً على جهازك. لا نرسل أي بيانات لخوادم خارجية.
+  </div>
+
+  <h2>1. البيانات التي نجمعها</h2>
+  <p>لا تجمع هذه التطبيقات أي بيانات شخصية. جميع البيانات المُدخلة (مبيعات، موظفون، رواتب) تُخزن فقط على متصفح جهازك باستخدام <strong>IndexedDB</strong> و<strong>localStorage</strong>.</p>
+
+  <h2>2. التخزين المحلي</h2>
+  <ul>
+    <li>جميع البيانات تبقى على جهازك فقط.</li>
+    <li>مسح بيانات المتصفح سيحذف جميع بيانات التطبيق.</li>
+    <li>لا توجد قاعدة بيانات خارجية أو سيرفر.</li>
+  </ul>
+
+  <h2>3. كودات PIN</h2>
+  <p>كودات PIN تُخزن محلياً في localStorage بدون تشفير. يُنصح بعدم استخدام كلمات مرور حساسة كـ PIN.</p>
+
+  <h2>4. WhatsApp</h2>
+  <p>عند إرسال تقرير أو رسالة دعم عبر WhatsApp، يُعيد التطبيق توجيهك لـ wa.me مع نص مُعبأ مسبقاً. لا يتم الإرسال تلقائياً — أنت من يضغط "إرسال" في WhatsApp.</p>
+
+  <h2>5. الاتصال بالإنترنت</h2>
+  <p>يعمل التطبيق بالكامل offline بعد أول تحميل. المكتبات الخارجية (Chart.js، jsPDF، SheetJS) تُحمَّل من CDN عند وجود اتصال.</p>
+
+  <h2>6. تواصل معنا</h2>
+  <p>أي استفسار حول الخصوصية: تواصل من خلال <a href="support.html" style="color:var(--accent);">صفحة الدعم</a>.</p>
+</div>
+</body>
+</html>

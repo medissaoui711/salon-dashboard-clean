@@ -1,0 +1,16 @@
+node_modules/
+.pnp
+dist/
+.output/
+.vercel/
+.wrangler/
+.env
+.env.local
+.env.*.local
+.dev.vars
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+tmp/
+temp/

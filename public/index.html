@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Salon Dashboard">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="لوحة تحكم إدارة الصالون — ثنائية اللغة، تعمل بدون إنترنت">
+<title>لوحة تحكم المبيعات | Sales Dashboard</title>
+<!-- Inline SVG favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6ef7'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18'%3E✂%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%234f6ef7'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-size='100'%3E✂%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#252838; --border:#2e3248;
+  --accent:#4f6ef7; --accent2:#7c3aed; --green:#10b981; --red:#ef4444;
+  --amber:#f59e0b; --text:#e2e8f0; --muted:#64748b; --cyan:#06b6d4;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh;}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;align-items:center;gap:4px;height:54px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-logo{font-size:15px;font-weight:800;color:var(--accent);margin-inline-start:auto;display:flex;align-items:center;gap:5px;white-space:nowrap;padding-inline-start:8px;}
+.tab-btn{padding:6px 11px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;border-radius:8px;transition:all .2s;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.tab-btn.active{background:var(--accent);color:#fff;}
+.tab-btn:hover:not(.active){background:var(--surface2);color:var(--text);}
+.nav-tools{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.lang-btn{padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent);}
+.offline-badge{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:12px;font-size:10px;font-weight:600;background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);white-space:nowrap;}
+.offline-badge.offline{background:rgba(239,68,68,.15);color:var(--red);border-color:rgba(239,68,68,.3);}
+
+/* PAGES */
+.page{display:none;padding:16px;max-width:1440px;margin:0 auto;}
+.page.active{display:block;}
+
+/* KPI GRID */
+.kpi-mega{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;inset:0;opacity:.06;border-radius:12px;}
+.kpi.green::before{background:var(--green);}
+.kpi.blue::before{background:var(--accent);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.red::before{background:var(--red);}
+.kpi.purple::before{background:var(--accent2);}
+.kpi.cyan::before{background:var(--cyan);}
+.kpi .k-icon{font-size:20px;margin-bottom:6px;}
+.kpi .k-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.kpi .k-val{font-size:24px;font-weight:800;}
+.kpi .k-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.kpi.green .k-val{color:var(--green);}
+.kpi.blue .k-val{color:var(--accent);}
+.kpi.amber .k-val{color:var(--amber);}
+.kpi.red .k-val{color:var(--red);}
+.kpi.purple .k-val{color:#a78bfa;}
+.kpi.cyan .k-val{color:var(--cyan);}
+.kpi .k-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:3px;}
+.trend-up{color:var(--green);}
+.trend-dn{color:var(--red);}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden;}
+.section-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.section-title{font-size:14px;font-weight:700;}
+.section-body{padding:18px;}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media(max-width:1024px){.grid3{grid-template-columns:1fr 1fr;}}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+/* ═══ EMPLOYEE PROFILES ═══ */
+.emp-profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:20px;}
+.emp-profile-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.emp-profile-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.epc-header{background:linear-gradient(135deg,#1e2235 0%,#252838 100%);padding:20px;display:flex;align-items:center;gap:14px;position:relative;}
+.epc-avatar-wrap{position:relative;flex-shrink:0;}
+.epc-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);background:var(--surface2);}
+.epc-avatar-placeholder{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.epc-avatar-edit{position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;}
+[dir="rtl"] .epc-avatar-edit{right:auto;left:0;}
+.epc-avatar-input{display:none;}
+.epc-info{flex:1;min-width:0;}
+.epc-fullname{font-size:15px;font-weight:800;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.epc-id{font-size:11px;color:var(--muted);font-family:monospace;}
+.epc-status-dot{position:absolute;top:14px;inset-inline-end:14px;}
+.epc-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px;}
+.epc-field{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:6px 10px;background:var(--surface2);border-radius:8px;}
+.epc-field .efc-label{color:var(--muted);display:flex;align-items:center;gap:5px;}
+.epc-field .efc-val{font-weight:600;font-size:12px;}
+.epc-field .efc-val.warn{color:var(--amber);}
+.epc-field .efc-val.danger{color:var(--red);}
+.epc-field .efc-val.ok{color:var(--green);}
+.epc-actions{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.epc-actions .btn{flex:1;justify-content:center;font-size:12px;padding:6px 10px;}
+
+/* ICON SVG inline */
+.ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ico svg{width:1em;height:1em;}
+
+/* ═══ EXPIRY BADGES ═══ */
+.exp-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;}
+.exp-valid{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.exp-soon{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.exp-expired{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.exp-none{background:rgba(100,116,139,.15);color:var(--muted);}
+
+/* ═══ HEALTH CERT ═══ */
+.health-yes{color:var(--green);}
+.health-no{color:var(--red);}
+
+/* ═══ RESPONSIVE TABLE ═══ */
+@media(max-width:640px){
+  th,td{padding:7px 8px;font-size:11px;}
+  .btn-sm{padding:3px 7px;font-size:11px;}
+  .section-header{flex-direction:column;align-items:flex-start;}
+  .export-row{width:100%;justify-content:flex-start;}
+  .kpi .k-val{font-size:20px;}
+  .dash-hero{flex-direction:column;}
+  .dash-hero-right{width:100%;justify-content:space-between;}
+  .hero-stat{flex:1;}
+  .modal{padding:16px;width:96%;}
+  .form-2col{grid-template-columns:1fr;}
+  .emp-profiles-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  nav{height:48px;padding:0 8px;gap:2px;}
+  .tab-btn{padding:5px 8px;font-size:11px;}
+  .page{padding:10px;}
+  .section-body{padding:12px;}
+  .kpi-mega{gap:10px;}
+  .kpi{padding:12px 14px;}
+}
+/* Safe area for notched phones */
+@supports(padding:env(safe-area-inset-bottom)){
+  nav{padding-inline:max(12px,env(safe-area-inset-left));}
+  .page{padding-bottom:max(16px,env(safe-area-inset-bottom));}
+}
+
+/* ═══ PRINT ═══ */
+@media print{
+  nav,.btn,.export-row,.epc-actions{display:none!important;}
+  .page{display:block!important;padding:0;}
+  body{background:#fff;color:#000;}
+  .section{border:1px solid #ddd;break-inside:avoid;}
+}
+
+/* CHART */
+.chart-wrap{position:relative;height:240px;}
+.chart-wrap-tall{position:relative;height:300px;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--surface2);padding:9px 11px;text-align:right;font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+td{padding:8px 11px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(79,110,247,.04);}
+td.editable{cursor:pointer;}
+td.editable:hover{background:rgba(79,110,247,.12);border-radius:4px;}
+td.editable input{background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:3px 7px;border-radius:4px;font-size:13px;font-family:inherit;width:85px;outline:none;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge.cash{background:rgba(16,185,129,.15);color:var(--green);}
+.badge.card{background:rgba(79,110,247,.15);color:var(--accent);}
+.badge.active{background:rgba(16,185,129,.15);color:var(--green);}
+.badge.leave{background:rgba(245,158,11,.15);color:var(--amber);}
+.total-row td{font-weight:700;background:var(--surface2);}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s;font-weight:500;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#3d5ce6;}
+.btn-success{background:var(--green);color:#fff;}
+.btn-success:hover{background:#059669;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--border);}
+.btn-amber{background:var(--amber);color:#000;}
+.btn-amber:hover{background:#d97706;}
+.btn-wa{background:#25D366;color:#fff;}
+.btn-wa:hover{background:#128C7E;}
+.btn-sm{padding:4px 9px;font-size:12px;}
+.export-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+/* SALARY CARDS */
+.salary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin-bottom:16px;}
+.emp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.emp-name{font-weight:700;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.emp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.emp-row:last-child{border-bottom:none;font-weight:700;}
+.emp-row span:first-child{color:var(--muted);}
+.edit-val{cursor:pointer;padding:2px 6px;border-radius:4px;min-width:55px;text-align:start;}
+.edit-val:hover{background:rgba(79,110,247,.15);}
+.edit-val input{background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:2px 5px;border-radius:4px;width:70px;font-size:12px;outline:none;font-family:inherit;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal h3{margin-bottom:18px;font-size:15px;}
+.form-row{margin-bottom:12px;}
+.form-row label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent);}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.filters input,.filters select{padding:6px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;display:flex;align-items:center;gap:6px;}
+.toast.show{opacity:1;}
+.toast.err{background:var(--red);}
+
+/* PROGRESS BAR */
+.prog-bar{background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;margin-top:4px;}
+.prog-fill{height:100%;border-radius:4px;transition:width .4s;}
+
+/* DASHBOARD HERO */
+.dash-hero{background:linear-gradient(135deg,var(--surface) 0%,#1e2235 100%);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.dash-hero-left h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+.dash-hero-left p{font-size:13px;color:var(--muted);}
+.dash-hero-right{display:flex;gap:10px;}
+.hero-stat{background:rgba(255,255,255,.05);border-radius:10px;padding:12px 18px;text-align:center;}
+.hero-stat .hv{font-size:22px;font-weight:800;}
+.hero-stat .hl{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ACTIVITY FEED */
+.activity-list{display:flex;flex-direction:column;gap:8px;}
+.act-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;font-size:13px;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-dot.green{background:var(--green);}
+.act-dot.blue{background:var(--accent);}
+.act-dot.amber{background:var(--amber);}
+.act-time{color:var(--muted);font-size:11px;margin-inline-start:auto;white-space:nowrap;}
+
+/* SHOP GRID */
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.shop-item{background:var(--surface2);border-radius:8px;padding:12px;}
+.shop-item .si-label{font-size:11px;color:var(--muted);}
+.shop-item .si-val{font-size:19px;font-weight:700;color:var(--amber);margin-top:3px;}
+.shop-item.edit-shop .si-val{cursor:pointer;}
+.shop-item.edit-shop .si-val:hover{color:var(--accent);}
+.shop-item.edit-shop input{background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:2px 6px;border-radius:4px;width:90px;font-size:14px;font-weight:700;outline:none;font-family:inherit;}
+
+/* EXP TYPE */
+.exp-type{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;}
+.exp-product{background:rgba(124,58,237,.15);color:#a78bfa;}
+.exp-daily{background:rgba(245,158,11,.15);color:var(--amber);}
+.exp-receivable{background:rgba(16,185,129,.15);color:var(--green);}
+
+/* SYNC STATUS */
+.sync-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* STORAGE BAR */
+.storage-info{background:var(--surface2);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.storage-info .si-text{font-size:12px;color:var(--muted);}
+
+/* PDF PREVIEW */
+.pdf-preview-btn{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.pdf-preview-btn:hover{background:rgba(239,68,68,.25);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <button class="tab-btn active" data-page="dashboard" onclick="showPage('dashboard',this)">
+    <span class="t" data-ar="🏠 الرئيسية" data-en="🏠 Dashboard">🏠 الرئيسية</span>
+  </button>
+  <button class="tab-btn" data-page="daily" onclick="showPage('daily',this)">
+    <span class="t" data-ar="📅 المبيعات" data-en="📅 Sales">📅 المبيعات</span>
+  </button>
+  <button class="tab-btn" data-page="employees" onclick="showPage('employees',this)">
+    <span class="t" data-ar="👥 الموظفون" data-en="👥 Employees">👥 الموظفون</span>
+  </button>
+  <button class="tab-btn" data-page="salary" onclick="showPage('salary',this)">
+    <span class="t" data-ar="💰 الرواتب" data-en="💰 Salaries">💰 الرواتب</span>
+  </button>
+  <button class="tab-btn" data-page="expenses" onclick="showPage('expenses',this)">
+    <span class="t" data-ar="🧾 المصروفات" data-en="🧾 Expenses">🧾 المصروفات</span>
+  </button>
+  <button class="tab-btn" data-page="reports" onclick="showPage('reports',this)">
+    <span class="t" data-ar="📤 التقارير" data-en="📤 Reports">📤 التقارير</span>
+  </button>
+  <button class="tab-btn" data-page="settings" onclick="showPage('settings',this)">
+    <span class="t" data-ar="⚙️ الإعدادات" data-en="⚙️ Settings">⚙️ الإعدادات</span>
+  </button>
+  <div class="nav-tools">
+    <div class="offline-badge" id="onlineBadge">
+      <span>●</span><span class="t" data-ar="متصل" data-en="Online">متصل</span>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()">EN / عر</button>
+    <button class="lang-btn" onclick="doLogout()" style="color:#ef4444;border-color:rgba(239,68,68,.3);" title="خروج">⏻</button>
+  </div>
+  <div class="nav-logo">✂️ <span class="t" data-ar="صالون الإدارة" data-en="Salon Manager">صالون الإدارة</span></div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- =========== DASHBOARD =========== -->
+<div class="page active" id="page-dashboard">
+  <!-- HERO -->
+  <div class="dash-hero">
+    <div class="dash-hero-left">
+      <h1 class="t" data-ar="لوحة تحكم المبيعات" data-en="Sales Control Panel">لوحة تحكم المبيعات</h1>
+      <p id="heroDate"></p>
+    </div>
+    <div class="dash-hero-right">
+      <div class="hero-stat"><div class="hv" id="hv1" style="color:var(--green)">-</div><div class="hl t" data-ar="إجمالي اليوم" data-en="Today's Total">إجمالي اليوم</div></div>
+      <div class="hero-stat"><div class="hv" id="hv2" style="color:var(--accent)">-</div><div class="hl t" data-ar="أفضل موظف" data-en="Top Performer">أفضل موظف</div></div>
+      <div class="hero-stat"><div class="hv" id="hv3" style="color:var(--amber)">-</div><div class="hl t" data-ar="صافي الربح" data-en="Net Profit">صافي الربح</div></div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-mega" id="kpi-row"></div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="grid2" style="margin-bottom:18px;">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title t" data-ar="📈 اتجاه المبيعات اليومية" data-en="📈 Daily Sales Trend">📈 اتجاه المبيعات اليومية</span>
+        <select id="chartFilter" onchange="renderDashboard()" style="padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;">
+          <option value="all" class="t" data-ar="كل الأيام" data-en="All Days">كل الأيام</option>
+          <option value="15" class="t" data-ar="آخر 15 يوم" data-en="Last 15 Days">آخر 15 يوم</option>
+          <option value="7" class="t" data-ar="آخر 7 أيام" data-en="Last 7 Days">آخر 7 أيام</option>
+        </select>
+      </div>
+      <div class="section-body"><div class="chart-wrap-tall"><canvas id="chartDaily"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="👤 مقارنة أداء الموظفين" data-en="👤 Employee Performance">👤 مقارنة أداء الموظفين</span></div>
+      <div class="section-body"><div class="chart-wrap-tall"><canvas id="chartEmp"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="grid3" style="margin-bottom:18px;">
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="💳 نقد / بطاقة" data-en="💳 Cash / Card">💳 نقد / بطاقة</span></div>
+      <div class="section-body"><div class="chart-wrap"><canvas id="chartCashCard"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="📊 توزيع المبيعات" data-en="📊 Sales Distribution">📊 توزيع المبيعات</span></div>
+      <div class="section-body"><div class="chart-wrap"><canvas id="chartWeek"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="🎯 معدل الأداء" data-en="🎯 Performance Rate">🎯 معدل الأداء</span></div>
+      <div class="section-body" id="perfRateBody"></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Shop + Activity -->
+  <div class="grid2">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title t" data-ar="🏪 تكاليف المتجر (قابل للتعديل)" data-en="🏪 Shop Costs (Editable)">🏪 تكاليف المتجر</span>
+      </div>
+      <div class="section-body" id="shopBody"></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="🕐 آخر النشاطات" data-en="🕐 Recent Activity">🕐 آخر النشاطات</span></div>
+      <div class="section-body"><div class="activity-list" id="activityFeed"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== DAILY SALES =========== -->
+<div class="page" id="page-daily">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title t" data-ar="📅 جدول المبيعات اليومية" data-en="📅 Daily Sales Table">📅 جدول المبيعات اليومية</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <div class="filters">
+          <input type="text" id="srchDaily" placeholder="🔍 بحث..." oninput="renderDailyTable()" style="width:140px;">
+        </div>
+        <button class="btn btn-primary" onclick="openAddSale()">+<span class="t" data-ar=" إضافة" data-en=" Add"> إضافة</span></button>
+        <button class="btn btn-success btn-sm" onclick="exportDailyExcel()">⬇️ Excel</button>
+        <button class="btn btn-danger btn-sm pdf-preview-btn" onclick="exportDailyPDF()">📄 PDF</button>
+        <button class="btn btn-wa btn-sm" onclick="shareReport('daily')">📲 WhatsApp</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="tbl-wrap">
+        <table id="dailyTable">
+          <thead id="dailyHead"></thead>
+          <tbody id="dailyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== EMPLOYEES =========== -->
+<div class="page" id="page-employees">
+  <!-- Profile Cards View -->
+  <div class="section" style="margin-bottom:16px;">
+    <div class="section-header">
+      <span class="section-title t" data-ar="👥 ملفات الموظفين" data-en="👥 Employee Profiles">👥 ملفات الموظفين</span>
+      <div class="export-row">
+        <button class="btn btn-primary" onclick="openAddEmp()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="t" data-ar="إضافة موظف" data-en="Add Employee">إضافة موظف</span>
+        </button>
+        <button class="btn btn-success btn-sm" onclick="exportEmpExcel()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Excel
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="exportEmpPDF()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </button>
+      </div>
+    </div>
+    <div class="section-body">
+      <!-- Alert: expiring docs -->
+      <div id="empAlerts"></div>
+      <!-- Cards -->
+      <div class="emp-profiles-grid" id="empProfilesGrid"></div>
+    </div>
+  </div>
+  <!-- Table View -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title t" data-ar="📋 جدول الموظفين" data-en="📋 Employees Table">📋 جدول الموظفين</span>
+    </div>
+    <div class="section-body">
+      <div class="tbl-wrap">
+        <table><thead id="empHead"></thead><tbody id="empTbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== SALARY =========== -->
+<div class="page" id="page-salary">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title t" data-ar="💰 تفصيل الرواتب" data-en="💰 Salary Details">💰 تفصيل الرواتب</span>
+      <div class="export-row">
+        <button class="btn btn-success" onclick="recalcAll()">🔄<span class="t" data-ar=" إعادة الحساب" data-en=" Recalculate"> إعادة الحساب</span></button>
+        <button class="btn btn-success btn-sm" onclick="exportSalaryExcel()">⬇️ Excel</button>
+        <button class="btn btn-danger btn-sm pdf-preview-btn" onclick="exportSalaryPDF()">📄 PDF</button>
+        <button class="btn btn-wa btn-sm" onclick="shareReport('salary')">📲 WhatsApp</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="salary-grid" id="salaryCards"></div>
+      <div class="section" style="margin-top:14px;">
+        <div class="section-header"><span class="section-title t" data-ar="📊 ملخص الرواتب النهائية" data-en="📊 Final Salary Summary">📊 ملخص الرواتب النهائية</span></div>
+        <div class="section-body">
+          <div class="tbl-wrap">
+            <table><thead id="salaryHead"></thead><tbody id="salaryFinalTbody"></tbody><tfoot><tr class="total-row" id="salaryTotalsRow"></tr></tfoot></table>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-mega" id="salary-kpis" style="margin-top:14px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== EXPENSES =========== -->
+<div class="page" id="page-expenses">
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title t" data-ar="🧾 المصروفات" data-en="🧾 Expenses">🧾 المصروفات</span>
+      <div class="export-row">
+        <button class="btn btn-primary" onclick="openAddExp()">+<span class="t" data-ar=" إضافة" data-en=" Add"> إضافة</span></button>
+        <button class="btn btn-success btn-sm" onclick="exportExpExcel()">⬇️ Excel</button>
+        <button class="btn btn-danger btn-sm pdf-preview-btn" onclick="exportExpPDF()">📄 PDF</button>
+        <button class="btn btn-wa btn-sm" onclick="shareReport('expenses')">📲 WhatsApp</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="tbl-wrap">
+        <table><thead id="expHead"></thead><tbody id="expTbody"></tbody>
+          <tfoot><tr class="total-row"><td colspan="3" style="text-align:right;font-weight:700;" class="t" data-ar="الإجمالي" data-en="Total">الإجمالي</td><td id="expTotal" style="color:var(--red);font-weight:700;"></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== REPORTS =========== -->
+<div class="page" id="page-reports">
+  <div class="section" style="margin-bottom:18px;">
+    <div class="section-header">
+      <span class="section-title t" data-ar="💾 التخزين المحلي والمزامنة" data-en="💾 Local Storage & Sync">💾 التخزين المحلي والمزامنة</span>
+      <div class="sync-row"><div class="sync-dot"></div><span class="t" data-ar="البيانات محفوظة محلياً" data-en="Data saved locally">البيانات محفوظة محلياً</span></div>
+    </div>
+    <div class="section-body">
+      <div class="storage-info" id="storageInfo"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="backupData()">💾<span class="t" data-ar=" حفظ نسخة احتياطية" data-en=" Backup Data"> حفظ نسخة احتياطية</span></button>
+        <button class="btn btn-ghost" onclick="document.getElementById('restoreFile').click()">📂<span class="t" data-ar=" استعادة نسخة" data-en=" Restore Backup"> استعادة نسخة</span></button>
+        <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreData(event)">
+        <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️<span class="t" data-ar=" مسح كل البيانات" data-en=" Clear All Data"> مسح كل البيانات</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="📊 تصدير Excel" data-en="📊 Export Excel">📊 تصدير Excel</span></div>
+      <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-success" onclick="exportDailyExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المبيعات اليومية" data-en="Daily Sales Report">تقرير المبيعات اليومية</span></button>
+        <button class="btn btn-success" onclick="exportSalaryExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الرواتب" data-en="Salary Report">تقرير الرواتب</span></button>
+        <button class="btn btn-success" onclick="exportEmpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الموظفين" data-en="Employee Report">تقرير الموظفين</span></button>
+        <button class="btn btn-success" onclick="exportExpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المصروفات" data-en="Expenses Report">تقرير المصروفات</span></button>
+        <button class="btn btn-amber" onclick="exportFullExcel()" style="width:100%;justify-content:center;">📦 <span class="t" data-ar="تصدير شامل (كل التقارير)" data-en="Full Export (All Reports)">تصدير شامل</span></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><span class="section-title t" data-ar="📄 تصدير PDF" data-en="📄 Export PDF">📄 تصدير PDF</span></div>
+      <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-danger" onclick="exportDailyPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المبيعات PDF" data-en="Daily Sales PDF">تقرير المبيعات PDF</span></button>
+        <button class="btn btn-danger" onclick="exportSalaryPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الرواتب PDF" data-en="Salary Report PDF">تقرير الرواتب PDF</span></button>
+        <button class="btn btn-danger" onclick="exportEmpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الموظفين PDF" data-en="Employee Report PDF">تقرير الموظفين PDF</span></button>
+        <button class="btn btn-danger" onclick="exportExpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المصروفات PDF" data-en="Expenses Report PDF">تقرير المصروفات PDF</span></button>
+        <button class="btn btn-amber" onclick="exportFullPDF()" style="width:100%;justify-content:center;">📦 <span class="t" data-ar="تقرير شامل PDF" data-en="Full PDF Report">تقرير شامل PDF</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:18px;">
+    <div class="section-header"><span class="section-title t" data-ar="📲 مشاركة عبر WhatsApp" data-en="📲 Share via WhatsApp">📲 مشاركة عبر WhatsApp</span></div>
+    <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="form-row">
+        <label class="t" data-ar="رقم الواتساب (مع رمز الدولة)" data-en="WhatsApp Number (with country code)">رقم الواتساب</label>
+        <input type="text" id="waNumber" placeholder="+966XXXXXXXXX" value="">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-wa" onclick="shareReport('daily')">📲 <span class="t" data-ar="مشاركة تقرير المبيعات" data-en="Share Sales Report">مشاركة تقرير المبيعات</span></button>
+        <button class="btn btn-wa" onclick="shareReport('salary')">📲 <span class="t" data-ar="مشاركة تقرير الرواتب" data-en="Share Salary Report">مشاركة تقرير الرواتب</span></button>
+        <button class="btn btn-wa" onclick="shareReport('expenses')">📲 <span class="t" data-ar="مشاركة تقرير المصروفات" data-en="Share Expenses Report">مشاركة تقرير المصروفات</span></button>
+        <button class="btn btn-wa" onclick="shareReport('full')">📲 <span class="t" data-ar="مشاركة التقرير الشامل" data-en="Share Full Report">مشاركة التقرير الشامل</span></button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;" class="t" data-ar="* يفتح WhatsApp Web تلقائياً مع محتوى التقرير" data-en="* Opens WhatsApp Web automatically with report content">* يفتح WhatsApp Web تلقائياً مع محتوى التقرير</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========== SETTINGS =========== -->
+<div class="page" id="page-settings">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;">
+    <div id="roleIconBadge" style="width:38px;height:38px;border-radius:10px;background:rgba(79,110,247,.15);display:flex;align-items:center;justify-content:center;font-size:20px;">👔</div>
+    <div><div style="font-size:14px;font-weight:700;" id="roleNameDisplay">المدير</div><div style="font-size:11px;color:var(--muted);" id="rolePermsDisplay">صلاحيات كاملة</div></div>
+    <button class="btn btn-danger btn-sm" style="margin-inline-start:auto;" onclick="doLogout()">⏻ <span class="t" data-ar="تسجيل الخروج" data-en="Logout">تسجيل الخروج</span></button>
+  </div>
+  <div class="grid2">
+    <div class="section">
+      <div class="section-header"><span class="section-title">🔗 <span class="t" data-ar="صفحات مساعدة" data-en="Quick Links">صفحات مساعدة</span></span></div>
+      <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+        <a href="support.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='#25D366'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">💬</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الدعم الفني" data-en="Support">الدعم الفني</div><div style="font-size:11px;color:var(--muted);" class="t" data-ar="تواصل مع فريق الدعم" data-en="Contact support">تواصل مع فريق الدعم</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+        <a href="privacy.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">🔒</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</div><div style="font-size:11px;color:var(--muted);">Privacy Policy</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+        <a href="faq.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">❓</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</div><div style="font-size:11px;color:var(--muted);">Frequently Asked Questions</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header"><span class="section-title">ℹ️ <span class="t" data-ar="عن التطبيق" data-en="About">عن التطبيق</span></span></div>
+      <div class="section-body">
+        <div style="text-align:center;padding:12px 0 18px;">
+          <div style="font-size:42px;margin-bottom:8px;">✂️</div>
+          <div style="font-size:17px;font-weight:800;color:var(--accent);" class="t" data-ar="صالون الإدارة" data-en="Salon Manager">صالون الإدارة</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">v3.0.0 · Bilingual · Offline-first</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;font-size:12px;">
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="المتصفح" data-en="Browser">المتصفح</span><span id="browserInfo">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="حجم البيانات" data-en="Data size">حجم البيانات</span><span id="storageInfoSmall">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="آخر دخول" data-en="Last login">آخر دخول</span><span id="lastLoginInfo">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="color:var(--muted);" class="t" data-ar="الدور الحالي" data-en="Current role">الدور الحالي</span><span id="currentRoleInfo" style="color:var(--accent);">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========== MODALS =========== -->
+<div class="modal-overlay" id="modalSale">
+  <div class="modal">
+    <h3 class="t" data-ar="➕ إضافة سجل مبيعات" data-en="➕ Add Sales Record">➕ إضافة سجل مبيعات</h3>
+    <input type="hidden" id="saleIdx">
+    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">التاريخ</label><input type="date" id="sDate"></div>
+    <div class="form-2col">
+      <div class="form-row"><label>محمد - نقد</label><input type="number" id="sMoh_c" min="0" value="0"></div>
+      <div class="form-row"><label>محمد - بطاقة</label><input type="number" id="sMoh_k" min="0" value="0"></div>
+      <div class="form-row"><label>شاري - نقد</label><input type="number" id="sSha_c" min="0" value="0"></div>
+      <div class="form-row"><label>شاري - بطاقة</label><input type="number" id="sSha_k" min="0" value="0"></div>
+      <div class="form-row"><label>ريزوان - نقد</label><input type="number" id="sRiz_c" min="0" value="0"></div>
+      <div class="form-row"><label>ريزوان - بطاقة</label><input type="number" id="sRiz_k" min="0" value="0"></div>
+      <div class="form-row"><label>أزيم - نقد</label><input type="number" id="sAze_c" min="0" value="0"></div>
+      <div class="form-row"><label>أزيم - بطاقة</label><input type="number" id="sAze_k" min="0" value="0"></div>
+    </div>
+    <div class="form-row"><label class="t" data-ar="عدد العملاء" data-en="Customers">عدد العملاء</label><input type="number" id="sCusts" min="0" value="0"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalSale')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
+      <button class="btn btn-primary" onclick="saveSale()"><span class="t" data-ar="حفظ" data-en="Save">حفظ</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalEmp">
+  <div class="modal" style="max-width:560px;">
+    <h3 class="t" data-ar="👤 بيانات الموظف" data-en="👤 Employee Profile">👤 بيانات الموظف</h3>
+    <input type="hidden" id="empIdx">
+
+    <!-- Photo upload -->
+    <div style="display:flex;justify-content:center;margin-bottom:16px;">
+      <div style="position:relative;display:inline-block;">
+        <img id="ePhotoPreview" src="" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);display:none;background:var(--surface2);">
+        <div id="ePhotoPlaceholder" style="width:80px;height:80px;border-radius:50%;border:3px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer;" onclick="document.getElementById('ePhotoInput').click()">👤</div>
+        <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;" onclick="document.getElementById('ePhotoInput').click()">📷</div>
+        <input type="file" id="ePhotoInput" accept="image/*" style="display:none" onchange="previewPhoto(event)">
+      </div>
+    </div>
+
+    <!-- Name row -->
+    <div class="form-2col">
+      <div class="form-row">
+        <label class="t" data-ar="الاسم الأول" data-en="First Name">الاسم الأول</label>
+        <input type="text" id="eFirstName" placeholder="محمد">
+      </div>
+      <div class="form-row">
+        <label class="t" data-ar="الاسم الأخير" data-en="Last Name">الاسم الأخير</label>
+        <input type="text" id="eLastName" placeholder="علي">
+      </div>
+    </div>
+
+    <!-- ID -->
+    <div class="form-2col">
+      <div class="form-row">
+        <label class="t" data-ar="رقم الهوية / ID" data-en="ID Number">رقم الهوية</label>
+        <input type="text" id="eIdNumber" placeholder="28501234567890">
+      </div>
+      <div class="form-row">
+        <label class="t" data-ar="تاريخ انتهاء الهوية" data-en="ID Expiry Date">تاريخ انتهاء الهوية</label>
+        <input type="date" id="eIdExpiry">
+      </div>
+    </div>
+
+    <!-- Health certificate -->
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="t" data-ar="الشهادة الصحية" data-en="Health Certificate">الشهادة الصحية</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="eHealthCert" id="eHealthYes" value="yes" style="accent-color:var(--green);">
+          <span style="color:var(--green);font-weight:600;" class="t" data-ar="✅ نعم" data-en="✅ Yes">✅ نعم</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;">
+          <input type="radio" name="eHealthCert" id="eHealthNo" value="no" style="accent-color:var(--red);" checked>
+          <span style="color:var(--red);font-weight:600;" class="t" data-ar="❌ لا" data-en="❌ No">❌ لا</span>
+        </label>
+        <div id="eHealthExpWrap" style="display:none;flex:1;min-width:140px;">
+          <input type="date" id="eHealthExpiry" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary & Status -->
+    <div class="form-2col">
+      <div class="form-row">
+        <label class="t" data-ar="الراتب الأساسي (QAR)" data-en="Base Salary (QAR)">الراتب الأساسي</label>
+        <input type="number" id="eBaseSalary" min="0" value="500">
+      </div>
+      <div class="form-row">
+        <label class="t" data-ar="الحوافز (QAR)" data-en="Incentive (QAR)">الحوافز</label>
+        <input type="number" id="eIncentive" min="0" value="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="t" data-ar="الحالة" data-en="Status">الحالة</label>
+      <select id="eStatus">
+        <option value="نشط">نشط / Active</option>
+        <option value="إجازة">إجازة / Leave</option>
+        <option value="غائب">غائب / Absent</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalEmp')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
+      <button class="btn btn-danger btn-sm" id="eDeleteBtn" style="display:none" onclick="deleteEmpFromModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        <span class="t" data-ar="حذف" data-en="Delete">حذف</span>
+      </button>
+      <button class="btn btn-primary" onclick="saveEmp()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span class="t" data-ar="حفظ" data-en="Save">حفظ</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalExp">
+  <div class="modal">
+    <h3 class="t" data-ar="🧾 مصروف" data-en="🧾 Expense">🧾 مصروف</h3>
+    <input type="hidden" id="expIdx">
+    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">التاريخ</label><input type="date" id="expDate"></div>
+    <div class="form-row"><label class="t" data-ar="الوصف" data-en="Description">الوصف</label><input type="text" id="expDesc"></div>
+    <div class="form-row"><label class="t" data-ar="النوع" data-en="Type">النوع</label>
+      <select id="expType">
+        <option value="product" class="t" data-ar="مصروف منتج" data-en="Product Expense">مصروف منتج</option>
+        <option value="daily" class="t" data-ar="مصروف يومي" data-en="Daily Expense">مصروف يومي</option>
+        <option value="receivable" class="t" data-ar="مستحقات شهرية" data-en="Monthly Receivable">مستحقات شهرية</option>
+      </select>
+    </div>
+    <div class="form-row"><label class="t" data-ar="المبلغ (QAR)" data-en="Amount (QAR)">المبلغ</label><input type="number" id="expAmt" min="0"></div>
+    <div class="form-row"><label class="t" data-ar="مدفوع؟" data-en="Paid?">مدفوع؟</label>
+      <select id="expPaid">
+        <option value="نعم" class="t" data-ar="نعم" data-en="Yes">نعم</option>
+        <option value="لا" class="t" data-ar="لا" data-en="No">لا</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalExp')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
+      <button class="btn btn-primary" onclick="saveExp()"><span class="t" data-ar="حفظ" data-en="Save">حفظ</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let lang = 'ar';
+let state = {
+  sales: [
+    {date:'2026-04-01',moh_c:127,moh_k:190,sha_c:100,sha_k:55,riz_c:110,riz_k:80,aze_c:25,aze_k:0,custs:19},
+    {date:'2026-04-02',moh_c:0,moh_k:175,sha_c:70,sha_k:165,riz_c:30,riz_k:230,aze_c:0,aze_k:0,custs:22},
+    {date:'2026-04-03',moh_c:95,moh_k:130,sha_c:205,sha_k:160,riz_c:95,riz_k:125,aze_c:0,aze_k:0,custs:24},
+    {date:'2026-04-04',moh_c:55,moh_k:215,sha_c:120,sha_k:285,riz_c:20,riz_k:315,aze_c:0,aze_k:0,custs:32},
+    {date:'2026-04-05',moh_c:30,moh_k:120,sha_c:115,sha_k:55,riz_c:50,riz_k:70,aze_c:0,aze_k:0,custs:14},
+    {date:'2026-04-06',moh_c:105,moh_k:215,sha_c:190,sha_k:160,riz_c:130,riz_k:185,aze_c:0,aze_k:0,custs:26},
+    {date:'2026-04-07',moh_c:70,moh_k:60,sha_c:145,sha_k:30,riz_c:80,riz_k:50,aze_c:0,aze_k:0,custs:26},
+    {date:'2026-04-08',moh_c:90,moh_k:130,sha_c:200,sha_k:125,riz_c:135,riz_k:115,aze_c:0,aze_k:130,custs:11},
+    {date:'2026-04-09',moh_c:60,moh_k:165,sha_c:165,sha_k:185,riz_c:100,riz_k:125,aze_c:55,aze_k:70,custs:27},
+    {date:'2026-04-10',moh_c:120,moh_k:280,sha_c:80,sha_k:260,riz_c:160,riz_k:110,aze_c:200,aze_k:30,custs:34},
+    {date:'2026-04-11',moh_c:145,moh_k:275,sha_c:55,sha_k:530,riz_c:75,riz_k:245,aze_c:115,aze_k:210,custs:47},
+    {date:'2026-04-12',moh_c:50,moh_k:125,sha_c:55,sha_k:135,riz_c:35,riz_k:20,aze_c:80,aze_k:55,custs:17},
+    {date:'2026-04-13',moh_c:0,moh_k:50,sha_c:85,sha_k:85,riz_c:90,riz_k:190,aze_c:75,aze_k:100,custs:19},
+    {date:'2026-04-14',moh_c:35,moh_k:185,sha_c:65,sha_k:30,riz_c:15,riz_k:220,aze_c:75,aze_k:100,custs:22},
+    {date:'2026-04-15',moh_c:80,moh_k:80,sha_c:75,sha_k:100,riz_c:0,riz_k:150,aze_c:25,aze_k:65,custs:19},
+    {date:'2026-04-16',moh_c:20,moh_k:25,sha_c:170,sha_k:120,riz_c:65,riz_k:360,aze_c:190,aze_k:25,custs:32},
+    {date:'2026-04-17',moh_c:55,moh_k:205,sha_c:65,sha_k:125,riz_c:125,riz_k:160,aze_c:100,aze_k:75,custs:31},
+    {date:'2026-04-18',moh_c:120,moh_k:235,sha_c:55,sha_k:555,riz_c:55,riz_k:275,aze_c:150,aze_k:85,custs:50},
+    {date:'2026-04-19',moh_c:25,moh_k:145,sha_c:175,sha_k:65,riz_c:70,riz_k:215,aze_c:25,aze_k:100,custs:29},
+    {date:'2026-04-20',moh_c:220,moh_k:180,sha_c:50,sha_k:25,riz_c:145,riz_k:50,aze_c:60,aze_k:20,custs:12},
+    {date:'2026-04-21',moh_c:0,moh_k:30,sha_c:50,sha_k:25,riz_c:75,riz_k:25,aze_c:70,aze_k:100,custs:18},
+    {date:'2026-04-22',moh_c:30,moh_k:155,sha_c:120,sha_k:70,riz_c:105,riz_k:170,aze_c:135,aze_k:75,custs:28},
+    {date:'2026-04-23',moh_c:55,moh_k:335,sha_c:30,sha_k:15,riz_c:55,riz_k:180,aze_c:75,aze_k:105,custs:21},
+    {date:'2026-04-24',moh_c:100,moh_k:0,sha_c:0,sha_k:0,riz_c:125,riz_k:405,aze_c:60,aze_k:145,custs:19},
+    {date:'2026-04-25',moh_c:184,moh_k:310,sha_c:0,sha_k:0,riz_c:10,riz_k:70,aze_c:255,aze_k:80,custs:24},
+    {date:'2026-04-26',moh_c:125,moh_k:115,sha_c:0,sha_k:0,riz_c:160,riz_k:115,aze_c:30,aze_k:50,custs:23},
+    {date:'2026-04-27',moh_c:75,moh_k:160,sha_c:0,sha_k:0,riz_c:95,riz_k:330,aze_c:20,aze_k:90,custs:21},
+    {date:'2026-04-28',moh_c:0,moh_k:0,sha_c:0,sha_k:0,riz_c:90,riz_k:65,aze_c:95,aze_k:95,custs:21},
+    {date:'2026-04-29',moh_c:120,moh_k:170,sha_c:0,sha_k:0,riz_c:120,riz_k:315,aze_c:95,aze_k:115,custs:32},
+    {date:'2026-04-30',moh_c:95,moh_k:395,sha_c:0,sha_k:0,riz_c:0,riz_k:0,aze_c:0,aze_k:0,custs:33},
+  ],
+  employees: [
+    {firstName:'محمد',lastName:'علي',baseSalary:500,incentive:0,status:'نشط',idNumber:'28501234001',idExpiry:'2027-06-30',healthCert:'yes',healthExpiry:'2026-12-31',photo:''},
+    {firstName:'شاري',lastName:'خان',baseSalary:500,incentive:0,status:'نشط',idNumber:'28501234002',idExpiry:'2026-09-15',healthCert:'yes',healthExpiry:'2026-08-20',photo:''},
+    {firstName:'ريزوان',lastName:'أحمد',baseSalary:500,incentive:50,status:'نشط',idNumber:'28501234003',idExpiry:'2027-03-10',healthCert:'no',healthExpiry:'',photo:''},
+    {firstName:'أزيم',lastName:'حسين',baseSalary:500,incentive:200,status:'نشط',idNumber:'28501234004',idExpiry:'2026-07-05',healthCert:'yes',healthExpiry:'2026-10-01',photo:''},
+  ],
+  salaryDetails: [
+    {name:'محمد',base:2448.4,deductions:600,expense:1848.4,extraAdd:0},
+    {name:'شاري',base:2083.0,deductions:864,expense:1219.0,extraAdd:0},
+    {name:'ريزوان',base:2551.9,deductions:914,expense:1637.9,extraAdd:0},
+    {name:'أزيم',base:1435.8,deductions:1064,expense:371.8,extraAdd:0},
+  ],
+  shopCosts:{rent:8000,electricity:0,shopExp:0,kafeel:5500},
+  expenses:[
+    {date:'2026-04-01',desc:'إيجار المحل',type:'receivable',amt:8000,paid:'نعم'},
+    {date:'2026-04-15',desc:'كفيل',type:'receivable',amt:5500,paid:'نعم'},
+  ],
+  activityLog: []
+};
+
+// ========== INDEXEDDB ==========
+let db;
+function initDB() {
+  const req = indexedDB.open('SalonDB', 1);
+  req.onupgradeneeded = e => {
+    db = e.target.result;
+    if(!db.objectStoreNames.contains('state')) db.createObjectStore('state');
+  };
+  req.onsuccess = e => {
+    db = e.target.result;
+    loadFromDB();
+  };
+  req.onerror = () => console.log('IndexedDB unavailable, using memory');
+}
+
+function saveToDB() {
+  if(!db) { localStorage.setItem('salonState', JSON.stringify(state)); return; }
+  const tx = db.transaction('state','readwrite');
+  tx.objectStore('state').put(JSON.stringify(state),'main');
+  updateStorageInfo();
+}
+
+function loadFromDB() {
+  if(!db) {
+    const s = localStorage.getItem('salonState');
+    if(s) { try { state = JSON.parse(s); } catch(e){} }
+    renderAll(); return;
+  }
+  const tx = db.transaction('state','readonly');
+  const req = tx.objectStore('state').get('main');
+  req.onsuccess = e => {
+    if(e.target.result) { try { state = JSON.parse(e.target.result); } catch(e){} }
+    renderAll();
+  };
+  req.onerror = () => renderAll();
+}
+
+function updateStorageInfo() {
+  const sz = JSON.stringify(state).length;
+  const kb = (sz/1024).toFixed(1);
+  const el = document.getElementById('storageInfo');
+  if(el) el.innerHTML = `
+    <div style="flex:1;">
+      <div class="si-text" style="margin-bottom:6px;">${lang==='ar'?'حجم البيانات المحفوظة':'Stored Data Size'}: <strong>${kb} KB</strong></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${Math.min(kb/100*100,100)}%;background:var(--accent);"></div></div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--muted);">
+      <div style="font-size:20px;">💾</div>
+      <div>${lang==='ar'?'IndexedDB':'IndexedDB'}</div>
+    </div>
+  `;
+}
+
+// ========== ONLINE STATUS ==========
+function updateOnlineStatus() {
+  const badge = document.getElementById('onlineBadge');
+  if(navigator.onLine) {
+    badge.classList.remove('offline');
+    badge.innerHTML = `<span>●</span><span>${lang==='ar'?'متصل':'Online'}</span>`;
+  } else {
+    badge.classList.add('offline');
+    badge.innerHTML = `<span>●</span><span>${lang==='ar'?'Offline':'Offline'}</span>`;
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ========== LANG ==========
+function toggleLang() {
+  lang = lang==='ar' ? 'en' : 'ar';
+  const html = document.getElementById('html-root');
+  html.lang = lang;
+  html.dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.t[data-'+lang+']').forEach(el => {
+    el.textContent = el.getAttribute('data-'+lang);
+  });
+  renderAll();
+}
+
+function t(ar, en) { return lang==='ar' ? ar : en; }
+
+// ========== HELPERS ==========
+const fmt = n => (n||0).toLocaleString('en-US',{maximumFractionDigits:1});
+const totalSale = s => (s.moh_c||0)+(s.moh_k||0)+(s.sha_c||0)+(s.sha_k||0)+(s.riz_c||0)+(s.riz_k||0)+(s.aze_c||0)+(s.aze_k||0);
+const totalCash = s => (s.moh_c||0)+(s.sha_c||0)+(s.riz_c||0)+(s.aze_c||0);
+const totalCard = s => (s.moh_k||0)+(s.sha_k||0)+(s.riz_k||0)+(s.aze_k||0);
+const empTotal = (s, pref) => (s[pref+'_c']||0)+(s[pref+'_k']||0);
+const finalSalary = e => (e.base||0)-(e.deductions||0)+(e.extraAdd||0);
+const today = new Date().toISOString().slice(0,10);
+
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (err?' err':'');
+  setTimeout(()=>t.className='toast',2500);
+}
+
+function logActivity(msg) {
+  state.activityLog = state.activityLog || [];
+  state.activityLog.unshift({msg, time: new Date().toLocaleTimeString('ar')});
+  if(state.activityLog.length > 10) state.activityLog.pop();
+}
+
+// ========== PAGES ==========
+let charts={};
+function showPage(p, btn) {
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if(btn) btn.classList.add('active');
+  const renders = {dashboard:renderDashboard,daily:renderDailyTable,employees:renderEmpTable,salary:renderSalary,expenses:renderExpenses,reports:()=>updateStorageInfo(),settings:renderSettingsPage};
+  if(renders[p]) renders[p]();
+}
+
+function renderAll() {
+  renderDashboard();
+  renderDailyTable();
+  renderEmpTable();
+  renderSalary();
+  renderExpenses();
+  updateStorageInfo();
+  renderSettingsPage();
+  updateOnlineStatus();
+  applyLang();
+  const sess = JSON.parse(sessionStorage.getItem('salonSession')||'null');
+  if(sess) applyRolePermissions(sess.role);
+}
+
+function applyLang() {
+  document.querySelectorAll('.t[data-'+lang+']').forEach(el=>{
+    el.textContent = el.getAttribute('data-'+lang);
+  });
+}
+
+// ========== DASHBOARD ==========
+function renderDashboard() {
+  const totalSalesAll = state.sales.reduce((a,s)=>a+totalSale(s),0);
+  const totalCashAll = state.sales.reduce((a,s)=>a+totalCash(s),0);
+  const totalCardAll = state.sales.reduce((a,s)=>a+totalCard(s),0);
+  const totalCusts = state.sales.reduce((a,s)=>a+(s.custs||0),0);
+  const avgPerCust = totalCusts ? totalSalesAll/totalCusts : 0;
+  const totalExpAll = state.expenses.reduce((a,e)=>a+(e.amt||0),0);
+  const totalSalariesFin = state.salaryDetails.reduce((a,e)=>a+finalSalary(e),0);
+  const shopTotal = Object.values(state.shopCosts).reduce((a,v)=>a+v,0);
+  const netProfit = totalSalesAll - totalExpAll - totalSalariesFin - shopTotal;
+
+  // Hero
+  const lastSale = state.sales[state.sales.length-1];
+  const lastTotal = lastSale ? totalSale(lastSale) : 0;
+  document.getElementById('heroDate').textContent = new Date().toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('hv1').textContent = fmt(lastTotal) + ' QAR';
+  // Best employee
+  const empPrefs = [{n:t('محمد','Mohammad'),p:'moh'},{n:t('شاري','Shari'),p:'sha'},{n:t('ريزوان','Rizwan'),p:'riz'},{n:t('أزيم','Azeem'),p:'aze'}];
+  const best = empPrefs.reduce((a,b)=>{
+    const ta=state.sales.reduce((x,s)=>x+empTotal(s,a.p),0);
+    const tb=state.sales.reduce((x,s)=>x+empTotal(s,b.p),0);
+    return ta>tb?a:b;
+  });
+  document.getElementById('hv2').textContent = best.n;
+  document.getElementById('hv3').textContent = fmt(netProfit) + ' QAR';
+  document.getElementById('hv3').style.color = netProfit>=0 ? 'var(--green)':'var(--red)';
+
+  // KPIs
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi green"><div class="k-icon">💰</div><div class="k-label">${t('إجمالي المبيعات','Total Sales')}</div><div class="k-val">${fmt(totalSalesAll)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi blue"><div class="k-icon">💵</div><div class="k-label">${t('مبيعات نقدية','Cash Sales')}</div><div class="k-val">${fmt(totalCashAll)}</div><div class="k-sub">${((totalCashAll/totalSalesAll||0)*100).toFixed(0)}%</div></div>
+    <div class="kpi purple"><div class="k-icon">💳</div><div class="k-label">${t('مبيعات بطاقة','Card Sales')}</div><div class="k-val">${fmt(totalCardAll)}</div><div class="k-sub">${((totalCardAll/totalSalesAll||0)*100).toFixed(0)}%</div></div>
+    <div class="kpi amber"><div class="k-icon">👥</div><div class="k-label">${t('إجمالي العملاء','Total Customers')}</div><div class="k-val">${fmt(totalCusts)}</div><div class="k-sub">${t('عميل','customers')}</div></div>
+    <div class="kpi cyan"><div class="k-icon">📊</div><div class="k-label">${t('متوسط/عميل','Avg/Customer')}</div><div class="k-val">${fmt(avgPerCust)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi red"><div class="k-icon">🏷️</div><div class="k-label">${t('إجمالي المصروفات','Total Expenses')}</div><div class="k-val">${fmt(totalExpAll+totalSalariesFin+shopTotal)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi ${netProfit>=0?'green':'red'}"><div class="k-icon">📈</div><div class="k-label">${t('صافي الربح','Net Profit')}</div><div class="k-val">${fmt(netProfit)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi amber"><div class="k-icon">📅</div><div class="k-label">${t('أيام العمل','Working Days')}</div><div class="k-val">${state.sales.length}</div><div class="k-sub">${t('يوم','days')}</div></div>
+  `;
+
+  // Daily chart with filter
+  const flt = document.getElementById('chartFilter')?.value||'all';
+  let salesData = [...state.sales];
+  if(flt==='7') salesData = salesData.slice(-7);
+  if(flt==='15') salesData = salesData.slice(-15);
+  const labels = salesData.map(s=>s.date.slice(5));
+  const cashVals = salesData.map(s=>totalCash(s));
+  const cardVals = salesData.map(s=>totalCard(s));
+
+  if(charts.daily) charts.daily.destroy();
+  charts.daily = new Chart(document.getElementById('chartDaily'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:t('نقد','Cash'),data:cashVals,backgroundColor:'rgba(16,185,129,.75)',borderRadius:4,stack:'a'},
+      {label:t('بطاقة','Card'),data:cardVals,backgroundColor:'rgba(79,110,247,.75)',borderRadius:4,stack:'a'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e2e8f0'}}},scales:{x:{ticks:{color:'#64748b',font:{size:10}},stacked:true},y:{ticks:{color:'#64748b'},stacked:true}}}
+  });
+
+  // Employee chart
+  const empNames = [t('محمد','Mohammad'),t('شاري','Shari'),t('ريزوان','Rizwan'),t('أزيم','Azeem')];
+  const empPrefsArr = ['moh','sha','riz','aze'];
+  const empTotals = empPrefsArr.map(p=>state.sales.reduce((a,s)=>a+empTotal(s,p),0));
+  if(charts.emp) charts.emp.destroy();
+  charts.emp = new Chart(document.getElementById('chartEmp'),{
+    type:'bar',
+    data:{labels:empNames,datasets:[{label:t('إجمالي المبيعات','Total Sales'),data:empTotals,backgroundColor:['rgba(79,110,247,.8)','rgba(16,185,129,.8)','rgba(245,158,11,.8)','rgba(167,139,250,.8)'],borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b'}},y:{ticks:{color:'#64748b'}}}}
+  });
+
+  // Cash vs Card donut
+  if(charts.cc) charts.cc.destroy();
+  charts.cc = new Chart(document.getElementById('chartCashCard'),{
+    type:'doughnut',
+    data:{labels:[t('نقد','Cash'),t('بطاقة','Card')],datasets:[{data:[totalCashAll,totalCardAll],backgroundColor:['#10b981','#4f6ef7'],borderWidth:3,borderColor:'#1a1d27'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#e2e8f0',padding:14}}}}
+  });
+
+  // Weekly distribution (by day of week avg)
+  const byDay = Array(7).fill(0); const byDayCnt = Array(7).fill(0);
+  state.sales.forEach(s=>{const d=new Date(s.date).getDay();byDay[d]+=totalSale(s);byDayCnt[d]++;});
+  const dayNames = lang==='ar'?['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if(charts.week) charts.week.destroy();
+  charts.week = new Chart(document.getElementById('chartWeek'),{
+    type:'radar',
+    data:{labels:dayNames,datasets:[{label:t('متوسط المبيعات','Avg Sales'),data:byDay.map((v,i)=>byDayCnt[i]?Math.round(v/byDayCnt[i]):0),backgroundColor:'rgba(79,110,247,.2)',borderColor:'var(--accent)',pointBackgroundColor:'var(--accent)'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{ticks:{color:'#64748b',backdropColor:'transparent'},grid:{color:'#2e3248'},pointLabels:{color:'#e2e8f0'}}}}
+  });
+
+  // Performance rates
+  document.getElementById('perfRateBody').innerHTML = empPrefsArr.map((p,i)=>{
+    const tot = state.sales.reduce((a,s)=>a+empTotal(s,p),0);
+    const pct = totalSalesAll ? Math.round(tot/totalSalesAll*100) : 0;
+    const colors=['var(--accent)','var(--green)','var(--amber)','#a78bfa'];
+    return `<div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${empNames[i]}</span><span style="color:${colors[i]};font-weight:700;">${pct}%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${colors[i]};"></div></div>
+    </div>`;
+  }).join('');
+
+  // Shop costs
+  const sc = state.shopCosts;
+  const shopItems = [
+    {key:'rent',label:t('الإيجار','Rent')},
+    {key:'electricity',label:t('الكهرباء','Electricity')},
+    {key:'shopExp',label:t('مصاريف المتجر','Shop Exp.')},
+    {key:'kafeel',label:t('الكفيل','Kafeel')},
+  ];
+  document.getElementById('shopBody').innerHTML = `<div class="shop-grid">
+    ${shopItems.map(si=>`<div class="shop-item edit-shop">
+      <div class="si-label">${si.label}</div>
+      <div class="si-val" onclick="editShopCost(this,'${si.key}')">${fmt(sc[si.key])} QAR</div>
+    </div>`).join('')}
+    <div class="shop-item"><div class="si-label" style="color:var(--red);">${t('إجمالي التكاليف','Total Costs')}</div><div class="si-val" style="color:var(--red);">${fmt(shopTotal)}</div></div>
+    <div class="shop-item"><div class="si-label" style="color:var(--green);">${t('صافي المتجر (65%)','Shop Net (65%)')}</div><div class="si-val" style="color:var(--green);">${fmt(totalSalesAll*.65)}</div></div>
+  </div>`;
+
+  // Activity feed
+  const feed = document.getElementById('activityFeed');
+  const activities = (state.activityLog||[]).slice(0,6);
+  if(!activities.length) activities.push({msg:t('لا توجد نشاطات مسجلة','No recent activity'),time:'',dot:'blue'});
+  feed.innerHTML = activities.map(a=>`<div class="act-item">
+    <div class="act-dot ${a.dot||'blue'}"></div>
+    <span>${a.msg}</span>
+    <span class="act-time">${a.time||''}</span>
+  </div>`).join('');
+}
+
+function editShopCost(el, key) {
+  if(el.querySelector('input')) return;
+  const cur = state.shopCosts[key]||0;
+  el.innerHTML = `<input type="number" value="${cur}" min="0" autofocus>`;
+  const inp = el.querySelector('input');
+  inp.focus(); inp.select();
+  const save = () => {
+    state.shopCosts[key] = parseFloat(inp.value)||0;
+    saveToDB();
+    renderDashboard();
+    showToast(t('✅ تم تحديث تكاليف المتجر','✅ Shop costs updated'));
+  };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape')renderDashboard();});
+  inp.addEventListener('blur',save);
+}
+
+// ========== DAILY TABLE ==========
+function renderDailyTable() {
+  const head = document.getElementById('dailyHead');
+  head.innerHTML = `<tr>
+    <th>${t('التاريخ','Date')}</th>
+    <th>${t('محمد-نقد','Moh-Cash')}</th><th>${t('محمد-بطاقة','Moh-Card')}</th>
+    <th>${t('شاري-نقد','Sha-Cash')}</th><th>${t('شاري-بطاقة','Sha-Card')}</th>
+    <th>${t('ريزوان-نقد','Riz-Cash')}</th><th>${t('ريزوان-بطاقة','Riz-Card')}</th>
+    <th>${t('أزيم-نقد','Aze-Cash')}</th><th>${t('أزيم-بطاقة','Aze-Card')}</th>
+    <th>${t('الإجمالي','Total')}</th><th>${t('العملاء','Custs')}</th><th>${t('متوسط','Avg')}</th><th></th>
+  </tr>`;
+
+  const q = (document.getElementById('srchDaily')?.value||'').toLowerCase();
+  const tbody = document.getElementById('dailyTbody');
+  let tot={moh_c:0,moh_k:0,sha_c:0,sha_k:0,riz_c:0,riz_k:0,aze_c:0,aze_k:0,total:0,custs:0};
+  let rows='';
+  state.sales.filter(s=>!q||s.date.includes(q)).forEach((s,i)=>{
+    const total=totalSale(s); const avg=s.custs?(total/s.custs).toFixed(1):'-';
+    ['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].forEach(k=>tot[k]+=(s[k]||0));
+    tot.total+=total; tot.custs+=(s.custs||0);
+    const isCash=f=>f.endsWith('_c');
+    rows+=`<tr>
+      <td>${s.date}</td>
+      ${['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].map(f=>`
+        <td class="editable" onclick="editCell(this,${i},'${f}')">
+          <span class="badge ${isCash(f)?'cash':'card'}">${s[f]||0}</span>
+        </td>`).join('')}
+      <td style="font-weight:700;color:var(--green)">${fmt(total)}</td>
+      <td class="editable" onclick="editCell(this,${i},'custs')">${s.custs||0}</td>
+      <td>${avg}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteSale(${i})">✕</button></td>
+    </tr>`;
+  });
+  const avgAll=tot.custs?(tot.total/tot.custs).toFixed(1):'-';
+  rows+=`<tr class="total-row">
+    <td>${t('الإجمالي','Total')}</td>
+    ${['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].map(k=>`<td>${fmt(tot[k])}</td>`).join('')}
+    <td style="color:var(--green)">${fmt(tot.total)}</td>
+    <td>${tot.custs}</td><td>${avgAll}</td><td></td>
+  </tr>`;
+  tbody.innerHTML=rows;
+}
+
+function editCell(td,idx,field) {
+  if(td.querySelector('input')) return;
+  const cur=state.sales[idx][field]||0;
+  td.innerHTML=`<input type="number" value="${cur}" min="0" autofocus>`;
+  const inp=td.querySelector('input'); inp.focus(); inp.select();
+  const save=()=>{
+    state.sales[idx][field]=parseFloat(inp.value)||0;
+    logActivity(t(`تم تعديل ${field} ليوم ${state.sales[idx].date}`,`Updated ${field} for ${state.sales[idx].date}`));
+    saveToDB(); renderDailyTable(); showToast(t('✅ تم الحفظ','✅ Saved'));
+  };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape')renderDailyTable();});
+  inp.addEventListener('blur',save);
+}
+
+// ========== SALARY ==========
+function renderSalary() {
+  const head=document.getElementById('salaryHead');
+  head.innerHTML=`<tr>
+    <th>${t('الموظف','Employee')}</th><th>${t('الراتب','Salary')}</th>
+    <th>${t('الحوافز','Incentive')}</th><th>${t('الخصومات','Deductions')}</th>
+    <th>${t('إضافي','Extra')}</th><th>${t('الراتب النهائي','Final Salary')}</th>
+  </tr>`;
+
+  const cards=document.getElementById('salaryCards');
+  let html='';
+  state.salaryDetails.forEach((e,i)=>{
+    const fin=finalSalary(e);
+    html+=`<div class="emp-card">
+      <div class="emp-name">👤 ${e.name}</div>
+      ${salRow(i,'base',t('الراتب الأساسي','Base Salary'),e.base)}
+      ${salRow(i,'deductions',t('الخصومات','Deductions'),e.deductions)}
+      ${salRow(i,'extraAdd',t('إضافي','Extra Add'),e.extraAdd)}
+      <div class="emp-row">
+        <span>${t('الراتب النهائي','Final')}</span>
+        <span style="color:${fin>=0?'var(--green)':'var(--red)'};font-weight:800;">${fmt(fin)} QAR</span>
+      </div>
+    </div>`;
+  });
+  cards.innerHTML=html;
+
+  const tbody=document.getElementById('salaryFinalTbody');
+  const totRow=document.getElementById('salaryTotalsRow');
+  let r='',totBase=0,totDed=0,totFin=0;
+  state.salaryDetails.forEach(e=>{
+    const fin=finalSalary(e); totBase+=e.base||0; totDed+=e.deductions||0; totFin+=fin;
+    const emp=state.employees.find(x=>(x.firstName||x.name||'').startsWith(e.name))||{};
+    r+=`<tr><td>${e.name}</td><td>${fmt(e.base)}</td><td>${fmt(emp.incentive||0)}</td>
+      <td style="color:var(--red)">(${fmt(e.deductions)})</td>
+      <td style="color:var(--green)">${fmt(e.extraAdd)}</td>
+      <td style="font-weight:800;color:${fin>=0?'var(--green)':'var(--red)'}">${fmt(fin)}</td></tr>`;
+  });
+  tbody.innerHTML=r;
+  totRow.innerHTML=`<td>${t('الإجمالي','Total')}</td><td>${fmt(totBase)}</td><td>-</td>
+    <td style="color:var(--red)">(${fmt(totDed)})</td><td>-</td>
+    <td style="color:var(--green);font-weight:800;">${fmt(totFin)}</td>`;
+
+  const totalSalesAll=state.sales.reduce((a,s)=>a+totalSale(s),0);
+  const shopTotal=Object.values(state.shopCosts).reduce((a,v)=>a+v,0);
+  const netProfit=totalSalesAll-totFin-shopTotal;
+  document.getElementById('salary-kpis').innerHTML=`
+    <div class="kpi red"><div class="k-icon">💸</div><div class="k-label">${t('إجمالي الرواتب','Total Salaries')}</div><div class="k-val">${fmt(totFin)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi amber"><div class="k-icon">🏪</div><div class="k-label">${t('تكاليف المتجر','Shop Costs')}</div><div class="k-val">${fmt(shopTotal)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi green"><div class="k-icon">💰</div><div class="k-label">${t('إجمالي المبيعات','Total Sales')}</div><div class="k-val">${fmt(totalSalesAll)}</div><div class="k-sub">QAR</div></div>
+    <div class="kpi ${netProfit>=0?'green':'red'}"><div class="k-icon">📈</div><div class="k-label">${t('صافي الربح','Net Profit')}</div><div class="k-val">${fmt(netProfit)}</div><div class="k-sub">QAR</div></div>
+  `;
+}
+
+function salRow(idx,field,label,val) {
+  return `<div class="emp-row">
+    <span>${label}</span>
+    <span class="edit-val" onclick="editSalField(this,${idx},'${field}')">${fmt(val)} QAR</span>
+  </div>`;
+}
+
+function editSalField(el,idx,field) {
+  if(el.querySelector('input')) return;
+  const cur=state.salaryDetails[idx][field]||0;
+  el.innerHTML=`<input type="number" value="${cur}" min="0">`;
+  const inp=el.querySelector('input'); inp.focus(); inp.select();
+  const save=()=>{
+    state.salaryDetails[idx][field]=parseFloat(inp.value)||0;
+    logActivity(t(`تم تعديل راتب ${state.salaryDetails[idx].name}`,`Updated salary for ${state.salaryDetails[idx].name}`));
+    saveToDB(); renderSalary(); showToast(t('✅ تم الحفظ','✅ Saved'));
+  };
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape')renderSalary();});
+  inp.addEventListener('blur',save);
+}
+
+function recalcAll() {
+  const empMap={محمد:['moh_c','moh_k'],شاري:['sha_c','sha_k'],ريزوان:['riz_c','riz_k'],أزيم:['aze_c','aze_k']};
+  state.salaryDetails.forEach(e=>{
+    const keys=empMap[e.name];
+    if(keys){const tot=state.sales.reduce((a,s)=>a+(s[keys[0]]||0)+(s[keys[1]]||0),0);e.base=Math.round(tot*.35*10)/10;}
+  });
+  logActivity(t('تم إعادة حساب جميع الرواتب','All salaries recalculated'));
+  saveToDB(); renderSalary(); showToast(t('🔄 تم إعادة الحساب','🔄 Recalculated'));
+}
+
+// ========== EMPLOYEES ==========
+// دالة مساعدة لحساب حالة انتهاء الصلاحية
+function expiryStatus(dateStr) {
+  if(!dateStr) return {cls:'exp-none',label:t('غير محدد','N/A'),days:null};
+  const days = Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24));
+  if(days < 0) return {cls:'exp-expired',label:t('منتهية','Expired'),days};
+  if(days <= 30) return {cls:'exp-soon',label:t(`${days} يوم`,`${days}d`),days};
+  return {cls:'exp-valid',label:dateStr,days};
+}
+
+// دالة الحصول على الاسم الكامل
+function empFullName(e) {
+  return (e.firstName||'') + (e.lastName?' '+e.lastName:'') || e.name || '—';
+}
+
+function renderEmpTable() {
+  document.getElementById('empHead').innerHTML=`<tr>
+    <th>#</th><th>${t('الصورة','Photo')}</th><th>${t('الاسم','Name')}</th>
+    <th>${t('الهوية','ID')}</th><th>${t('انتهاء الهوية','ID Expiry')}</th>
+    <th>${t('الشهادة الصحية','Health Cert')}</th>
+    <th>${t('الراتب','Salary')}</th><th>${t('الحالة','Status')}</th><th></th>
+  </tr>`;
+
+  document.getElementById('empTbody').innerHTML = state.employees.map((e,i)=>{
+    const idExp = expiryStatus(e.idExpiry);
+    const hExp  = expiryStatus(e.healthExpiry);
+    const photo = e.photo
+      ? `<img src="${e.photo}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;">👤</div>`;
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${photo}</td>
+      <td style="font-weight:600;">${empFullName(e)}</td>
+      <td style="font-family:monospace;font-size:11px;">${e.idNumber||'—'}</td>
+      <td><span class="exp-badge ${idExp.cls}">${idExp.label}</span></td>
+      <td>${e.healthCert==='yes'
+        ? `<span class="exp-badge ${hExp.cls}">✅ ${hExp.label}</span>`
+        : `<span class="exp-badge exp-expired">❌ ${t('لا','No')}</span>`}
+      </td>
+      <td>${fmt(e.baseSalary)} QAR</td>
+      <td><span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openEditEmp(${i})">${t('تعديل','Edit')}</button></td>
+    </tr>`;
+  }).join('');
+
+  renderEmpProfiles();
+}
+
+function renderEmpProfiles() {
+  const grid = document.getElementById('empProfilesGrid');
+  const alerts = document.getElementById('empAlerts');
+
+  // تنبيهات الوثائق المنتهية أو القريبة من الانتهاء
+  const warns = [];
+  state.employees.forEach(e=>{
+    const idExp = expiryStatus(e.idExpiry);
+    const hExp  = expiryStatus(e.healthExpiry);
+    if(idExp.days !== null && idExp.days <= 30)
+      warns.push(`⚠️ ${empFullName(e)}: ${t('هوية','ID')} — ${idExp.label}`);
+    if(e.healthCert==='yes' && hExp.days !== null && hExp.days <= 30)
+      warns.push(`⚠️ ${empFullName(e)}: ${t('شهادة صحية','Health cert')} — ${hExp.label}`);
+  });
+  alerts.innerHTML = warns.length
+    ? `<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;display:flex;flex-direction:column;gap:4px;">
+        <div style="font-weight:700;color:var(--amber);margin-bottom:4px;">⚠️ ${t('تنبيهات الوثائق','Document Alerts')}</div>
+        ${warns.map(w=>`<div style="color:var(--amber);">${w}</div>`).join('')}
+       </div>` : '';
+
+  const statusColors = {'نشط':'var(--green)','إجازة':'var(--amber)','غائب':'var(--red)'};
+
+  grid.innerHTML = state.employees.map((e,i)=>{
+    const idExp = expiryStatus(e.idExpiry);
+    const hExp  = expiryStatus(e.healthExpiry);
+    const dot = statusColors[e.status]||'var(--muted)';
+    const photoEl = e.photo
+      ? `<img src="${e.photo}" class="epc-avatar" alt="${empFullName(e)}">`
+      : `<div class="epc-avatar-placeholder">👤</div>`;
+
+    return `<div class="emp-profile-card">
+      <div class="epc-header">
+        <div class="epc-avatar-wrap">
+          ${photoEl}
+          <div class="epc-avatar-edit" onclick="openEditEmp(${i})" title="${t('تعديل الصورة','Edit photo')}">✏️</div>
+        </div>
+        <div class="epc-info">
+          <div class="epc-fullname">${empFullName(e)}</div>
+          <div class="epc-id">${t('هوية','ID')}: ${e.idNumber||'—'}</div>
+          <div style="margin-top:5px;">
+            <span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status}</span>
+          </div>
+        </div>
+        <div class="epc-status-dot">
+          <div style="width:10px;height:10px;border-radius:50%;background:${dot};box-shadow:0 0 6px ${dot};"></div>
+        </div>
+      </div>
+      <div class="epc-body">
+        <div class="epc-field">
+          <span class="efc-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            ${t('انتهاء الهوية','ID Expiry')}
+          </span>
+          <span class="exp-badge ${idExp.cls}">${idExp.label}</span>
+        </div>
+        <div class="epc-field">
+          <span class="efc-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            ${t('الشهادة الصحية','Health Cert')}
+          </span>
+          ${e.healthCert==='yes'
+            ? `<span class="exp-badge ${hExp.cls}">✅ ${hExp.label}</span>`
+            : `<span class="exp-badge exp-expired">❌ ${t('لا','No')}</span>`}
+        </div>
+        <div class="epc-field">
+          <span class="efc-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            ${t('الراتب','Salary')}
+          </span>
+          <span class="efc-val ok">${fmt(e.baseSalary)} QAR</span>
+        </div>
+        <div class="epc-field">
+          <span class="efc-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ${t('الحوافز','Incentive')}
+          </span>
+          <span class="efc-val" style="color:var(--accent);">${fmt(e.incentive)} QAR</span>
+        </div>
+      </div>
+      <div class="epc-actions">
+        <button class="btn btn-ghost" onclick="openEditEmp(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          ${t('تعديل','Edit')}
+        </button>
+        <button class="btn btn-danger" onclick="deleteEmp(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          ${t('حذف','Delete')}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Photo handling ──
+function previewPhoto(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  // ضغط الصورة قبل التخزين لتوفير مساحة IndexedDB
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 200;
+      let {width:w, height:h} = img;
+      if(w > h) { if(w>MAX){h=h*(MAX/w);w=MAX;} } else { if(h>MAX){w=w*(MAX/h);h=MAX;} }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataURL = canvas.toDataURL('image/jpeg', 0.75);
+      document.getElementById('ePhotoPreview').src = dataURL;
+      document.getElementById('ePhotoPreview').style.display = 'block';
+      document.getElementById('ePhotoPlaceholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function openAddEmp() {
+  document.getElementById('empIdx').value = '';
+  document.getElementById('eFirstName').value = '';
+  document.getElementById('eLastName').value = '';
+  document.getElementById('eIdNumber').value = '';
+  document.getElementById('eIdExpiry').value = '';
+  document.getElementById('eHealthNo').checked = true;
+  document.getElementById('eHealthExpiry').value = '';
+  document.getElementById('eHealthExpWrap').style.display = 'none';
+  document.getElementById('eBaseSalary').value = 500;
+  document.getElementById('eIncentive').value = 0;
+  document.getElementById('eStatus').value = 'نشط';
+  document.getElementById('ePhotoPreview').style.display = 'none';
+  document.getElementById('ePhotoPlaceholder').style.display = 'flex';
+  document.getElementById('ePhotoInput').value = '';
+  document.getElementById('eDeleteBtn').style.display = 'none';
+  document.getElementById('modalEmp').classList.add('open');
+}
+
+function openEditEmp(i) {
+  const e = state.employees[i];
+  document.getElementById('empIdx').value = i;
+  document.getElementById('eFirstName').value = e.firstName||'';
+  document.getElementById('eLastName').value = e.lastName||'';
+  document.getElementById('eIdNumber').value = e.idNumber||'';
+  document.getElementById('eIdExpiry').value = e.idExpiry||'';
+  if(e.healthCert==='yes'){
+    document.getElementById('eHealthYes').checked = true;
+    document.getElementById('eHealthExpWrap').style.display = 'block';
+  } else {
+    document.getElementById('eHealthNo').checked = true;
+    document.getElementById('eHealthExpWrap').style.display = 'none';
+  }
+  document.getElementById('eHealthExpiry').value = e.healthExpiry||'';
+  document.getElementById('eBaseSalary').value = e.baseSalary;
+  document.getElementById('eIncentive').value = e.incentive;
+  document.getElementById('eStatus').value = e.status;
+  if(e.photo) {
+    document.getElementById('ePhotoPreview').src = e.photo;
+    document.getElementById('ePhotoPreview').style.display = 'block';
+    document.getElementById('ePhotoPlaceholder').style.display = 'none';
+  } else {
+    document.getElementById('ePhotoPreview').style.display = 'none';
+    document.getElementById('ePhotoPlaceholder').style.display = 'flex';
+  }
+  document.getElementById('eDeleteBtn').style.display = 'inline-flex';
+  document.getElementById('modalEmp').classList.add('open');
+}
+
+function saveEmp() {
+  const idx = document.getElementById('empIdx').value;
+  const healthYes = document.getElementById('eHealthYes').checked;
+  // احفظ الصورة المضغوطة من الـ preview
+  const photoEl = document.getElementById('ePhotoPreview');
+  const photo = photoEl.style.display!=='none' ? photoEl.src : (idx!==''?state.employees[+idx].photo:'');
+
+  const obj = {
+    firstName: document.getElementById('eFirstName').value.trim(),
+    lastName:  document.getElementById('eLastName').value.trim(),
+    idNumber:  document.getElementById('eIdNumber').value.trim(),
+    idExpiry:  document.getElementById('eIdExpiry').value,
+    healthCert: healthYes ? 'yes' : 'no',
+    healthExpiry: healthYes ? document.getElementById('eHealthExpiry').value : '',
+    baseSalary: +document.getElementById('eBaseSalary').value,
+    incentive:  +document.getElementById('eIncentive').value,
+    status:     document.getElementById('eStatus').value,
+    photo,
+    // حافظ على الاسم القديم للتوافق مع قسم الرواتب
+    name: document.getElementById('eFirstName').value.trim(),
+  };
+
+  if(idx === '') state.employees.push(obj);
+  else state.employees[+idx] = obj;
+
+  logActivity(t(`${idx===''?'إضافة':'تعديل'} موظف: ${empFullName(obj)}`,`${idx===''?'Added':'Updated'}: ${empFullName(obj)}`));
+  closeModal('modalEmp');
+  saveToDB();
+  renderEmpTable();
+  showToast(t('✅ تم الحفظ','✅ Saved'));
+}
+
+function deleteEmpFromModal() {
+  const idx = +document.getElementById('empIdx').value;
+  if(confirm(t('تأكيد حذف الموظف؟','Confirm delete employee?'))) {
+    logActivity(t(`حذف موظف: ${empFullName(state.employees[idx])}`,`Deleted: ${empFullName(state.employees[idx])}`));
+    state.employees.splice(idx,1);
+    closeModal('modalEmp');
+    saveToDB();
+    renderEmpTable();
+    showToast(t('🗑️ تم الحذف','🗑️ Deleted'));
+  }
+}
+
+function deleteEmp(i) {
+  if(confirm(t('تأكيد الحذف؟','Confirm delete?'))) {
+    logActivity(t(`حذف موظف: ${empFullName(state.employees[i])}`,`Deleted: ${empFullName(state.employees[i])}`));
+    state.employees.splice(i,1);
+    saveToDB();
+    renderEmpTable();
+    showToast(t('🗑️ تم الحذف','🗑️ Deleted'));
+  }
+}
+
+// ========== EXPENSES ==========
+function renderExpenses() {
+  const typeMap={product:t('مصروف منتج','Product'),daily:t('مصروف يومي','Daily'),receivable:t('مستحقات','Receivable')};
+  const clsMap={product:'exp-product',daily:'exp-daily',receivable:'exp-receivable'};
+  document.getElementById('expHead').innerHTML=`<tr>
+    <th>${t('التاريخ','Date')}</th><th>${t('الوصف','Description')}</th><th>${t('النوع','Type')}</th>
+    <th>${t('المبلغ','Amount')}</th><th>${t('مدفوع','Paid')}</th><th></th>
+  </tr>`;
+  let total=0;
+  document.getElementById('expTbody').innerHTML=state.expenses.map((e,i)=>{
+    total+=e.amt||0;
+    return `<tr>
+      <td>${e.date}</td><td>${e.desc}</td>
+      <td><span class="exp-type ${clsMap[e.type]||''}">${typeMap[e.type]||e.type}</span></td>
+      <td style="color:var(--red);font-weight:600;">${fmt(e.amt)} QAR</td>
+      <td><span class="badge ${e.paid==='نعم'?'cash':'card'}">${e.paid}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteExp(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('expTotal').textContent=fmt(total)+' QAR';
+}
+
+function openAddExp(){document.getElementById('expIdx').value='';document.getElementById('expDate').value=today;document.getElementById('expDesc').value='';document.getElementById('expAmt').value='';document.getElementById('modalExp').classList.add('open');}
+function saveExp(){
+  const obj={date:document.getElementById('expDate').value,desc:document.getElementById('expDesc').value,type:document.getElementById('expType').value,amt:+document.getElementById('expAmt').value,paid:document.getElementById('expPaid').value};
+  state.expenses.push(obj);
+  logActivity(t(`تم إضافة مصروف: ${obj.desc} - ${obj.amt} QAR`,`Added expense: ${obj.desc} - ${obj.amt} QAR`));
+  closeModal('modalExp'); saveToDB(); renderExpenses(); showToast(t('✅ تم الحفظ','✅ Saved'));
+}
+function deleteExp(i){if(confirm(t('تأكيد الحذف؟','Confirm delete?'))){state.expenses.splice(i,1);saveToDB();renderExpenses();showToast(t('🗑️ تم الحذف','🗑️ Deleted'));}}
+
+// ========== SALE MODAL ==========
+function openAddSale(){
+  document.getElementById('saleIdx').value='';
+  document.getElementById('sDate').value=today;
+  ['sMoh_c','sMoh_k','sSha_c','sSha_k','sRiz_c','sRiz_k','sAze_c','sAze_k','sCusts'].forEach(id=>document.getElementById(id).value=0);
+  document.getElementById('modalSale').classList.add('open');
+}
+function saveSale(){
+  const obj={date:document.getElementById('sDate').value,moh_c:+document.getElementById('sMoh_c').value,moh_k:+document.getElementById('sMoh_k').value,sha_c:+document.getElementById('sSha_c').value,sha_k:+document.getElementById('sSha_k').value,riz_c:+document.getElementById('sRiz_c').value,riz_k:+document.getElementById('sRiz_k').value,aze_c:+document.getElementById('sAze_c').value,aze_k:+document.getElementById('sAze_k').value,custs:+document.getElementById('sCusts').value};
+  state.sales.push(obj); state.sales.sort((a,b)=>a.date.localeCompare(b.date));
+  logActivity(t(`تم إضافة مبيعات يوم ${obj.date}`,`Added sales for ${obj.date}`));
+  closeModal('modalSale'); saveToDB(); renderDailyTable(); showToast(t('✅ تم الحفظ','✅ Saved'));
+}
+function deleteSale(i){if(confirm(t('تأكيد الحذف؟','Confirm delete?'))){logActivity(t(`تم حذف مبيعات يوم ${state.sales[i].date}`,`Deleted sales for ${state.sales[i].date}`));state.sales.splice(i,1);saveToDB();renderDailyTable();showToast(t('🗑️ تم الحذف','🗑️ Deleted'));}}
+
+// ========== MODAL ==========
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// ========== BACKUP / RESTORE ==========
+function backupData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`salon-backup-${today}.json`; a.click();
+  showToast(t('💾 تم تصدير النسخة الاحتياطية','💾 Backup exported'));
+}
+function restoreData(event){
+  const f=event.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{try{state=JSON.parse(e.target.result);saveToDB();renderAll();showToast(t('✅ تمت الاستعادة','✅ Restored'));}catch(err){showToast(t('❌ ملف غير صالح','❌ Invalid file'),true);}};
+  reader.readAsText(f);
+}
+function clearAllData(){if(confirm(t('هل أنت متأكد من حذف كل البيانات؟','Delete all data?'))){const fresh={sales:[],employees:[],salaryDetails:[],shopCosts:{rent:0,electricity:0,shopExp:0,kafeel:0},expenses:[],activityLog:[]};state=fresh;saveToDB();renderAll();showToast(t('🗑️ تم مسح البيانات','🗑️ Data cleared'));}}
+
+// ========== EXCEL EXPORT ==========
+function buildDailyWS(){
+  const header=[t('التاريخ','Date'),t('محمد-نقد','Moh-Cash'),t('محمد-بطاقة','Moh-Card'),t('شاري-نقد','Sha-Cash'),t('شاري-بطاقة','Sha-Card'),t('ريزوان-نقد','Riz-Cash'),t('ريزوان-بطاقة','Riz-Card'),t('أزيم-نقد','Aze-Cash'),t('أزيم-بطاقة','Aze-Card'),t('الإجمالي','Total'),t('العملاء','Custs'),t('متوسط','Avg')];
+  const rows=state.sales.map(s=>{const tot=totalSale(s);return[s.date,s.moh_c,s.moh_k,s.sha_c,s.sha_k,s.riz_c,s.riz_k,s.aze_c,s.aze_k,tot,s.custs,s.custs?+(tot/s.custs).toFixed(1):0];});
+  return [header,...rows];
+}
+function exportDailyExcel(){
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(buildDailyWS());
+  XLSX.utils.book_append_sheet(wb,ws,t('المبيعات','Sales'));
+  XLSX.writeFile(wb,`sales-report-${today}.xlsx`);
+  showToast(t('⬇️ تم تصدير Excel','⬇️ Excel exported'));
+}
+function exportSalaryExcel(){
+  const header=[t('الموظف','Employee'),t('الراتب الأساسي','Base'),t('الخصومات','Deductions'),t('إضافي','Extra'),t('الراتب النهائي','Final')];
+  const rows=state.salaryDetails.map(e=>[e.name,e.base,e.deductions,e.extraAdd,finalSalary(e)]);
+  const wb=XLSX.utils.book_new(); const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
+  XLSX.utils.book_append_sheet(wb,ws,t('الرواتب','Salaries'));
+  XLSX.writeFile(wb,`salary-report-${today}.xlsx`);
+  showToast(t('⬇️ تم تصدير Excel','⬇️ Excel exported'));
+}
+function exportEmpExcel(){
+  const header=[t('الاسم الأول','First'),t('الاسم الأخير','Last'),t('الهوية','ID'),t('انتهاء الهوية','ID Expiry'),t('الشهادة الصحية','Health'),t('انتهاء الشهادة','Health Expiry'),t('الراتب','Salary'),t('الحوافز','Incentive'),t('الحالة','Status')];
+  const rows=state.employees.map(e=>[e.firstName||e.name,e.lastName||'',e.idNumber||'',e.idExpiry||'',e.healthCert==='yes'?'Yes':'No',e.healthExpiry||'',e.baseSalary,e.incentive,e.status]);
+  const wb=XLSX.utils.book_new(); const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
+  XLSX.utils.book_append_sheet(wb,ws,t('الموظفون','Employees'));
+  XLSX.writeFile(wb,`employees-${today}.xlsx`);
+  showToast(t('⬇️ تم تصدير Excel','⬇️ Excel exported'));
+}
+function exportExpExcel(){
+  const header=[t('التاريخ','Date'),t('الوصف','Description'),t('النوع','Type'),t('المبلغ','Amount'),t('مدفوع','Paid')];
+  const rows=state.expenses.map(e=>[e.date,e.desc,e.type,e.amt,e.paid]);
+  const wb=XLSX.utils.book_new(); const ws=XLSX.utils.aoa_to_sheet([header,...rows]);
+  XLSX.utils.book_append_sheet(wb,ws,t('المصروفات','Expenses'));
+  XLSX.writeFile(wb,`expenses-${today}.xlsx`);
+  showToast(t('⬇️ تم تصدير Excel','⬇️ Excel exported'));
+}
+function exportFullExcel(){
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(buildDailyWS()),t('المبيعات','Sales'));
+  const sh=[t('الموظف','Emp'),t('الراتب','Base'),t('الخصومات','Ded'),t('إضافي','Extra'),t('النهائي','Final')];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([sh,...state.salaryDetails.map(e=>[e.name,e.base,e.deductions,e.extraAdd,finalSalary(e)])]),t('الرواتب','Salaries'));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([[t('الاسم','Name'),t('الراتب','Salary'),t('الحوافز','Incentive')],...state.employees.map(e=>[e.name,e.baseSalary,e.incentive])]),t('الموظفون','Employees'));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([[t('التاريخ','Date'),t('الوصف','Desc'),t('المبلغ','Amt')],...state.expenses.map(e=>[e.date,e.desc,e.amt])]),t('المصروفات','Expenses'));
+  XLSX.writeFile(wb,`full-report-${today}.xlsx`);
+  showToast(t('📦 تم تصدير التقرير الشامل','📦 Full report exported'));
+}
+
+// ========== PDF EXPORT ==========
+function makePDF(title, head, rows, filename){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape'});
+  // Header
+  doc.setFillColor(26,29,39); doc.rect(0,0,297,20,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(14); doc.setFont(undefined,'bold');
+  doc.text(title,148,12,{align:'center'});
+  doc.setFontSize(9); doc.setTextColor(150,150,150);
+  doc.text('Salon Manager | '+today,148,18,{align:'center'});
+  // Table
+  doc.autoTable({head:[head],body:rows,startY:24,styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[79,110,247],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[245,247,250]},margin:{left:10,right:10}});
+  // Footer
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150);doc.text(`Page ${i}/${pageCount}`,148,doc.internal.pageSize.height-5,{align:'center'});}
+  doc.save(filename);
+  showToast(t('📄 تم تصدير PDF','📄 PDF exported'));
+}
+
+function exportDailyPDF(){
+  const head=[t('التاريخ','Date'),'Moh-C','Moh-K','Sha-C','Sha-K','Riz-C','Riz-K','Aze-C','Aze-K',t('الإجمالي','Total'),t('العملاء','Custs')];
+  const rows=state.sales.map(s=>[s.date,s.moh_c,s.moh_k,s.sha_c,s.sha_k,s.riz_c,s.riz_k,s.aze_c,s.aze_k,totalSale(s),s.custs]);
+  makePDF(t('تقرير المبيعات اليومية','Daily Sales Report'),head,rows,`sales-${today}.pdf`);
+}
+function exportSalaryPDF(){
+  const head=[t('الموظف','Employee'),t('الراتب','Base'),t('الخصومات','Deductions'),t('إضافي','Extra'),t('النهائي','Final')];
+  const rows=state.salaryDetails.map(e=>[e.name,e.base,e.deductions,e.extraAdd,finalSalary(e)]);
+  makePDF(t('تقرير الرواتب','Salary Report'),head,rows,`salary-${today}.pdf`);
+}
+function exportEmpPDF(){
+  const head=[t('الاسم','Name'),t('الهوية','ID'),t('انتهاء الهوية','ID Expiry'),t('الشهادة الصحية','Health'),t('الراتب','Salary'),t('الحالة','Status')];
+  const rows=state.employees.map(e=>[(e.firstName||e.name||'')+(e.lastName?' '+e.lastName:''),e.idNumber||'—',e.idExpiry||'—',e.healthCert==='yes'?'Yes: '+e.healthExpiry:'No',e.baseSalary+' QAR',e.status]);
+  makePDF(t('تقرير الموظفين','Employee Report'),head,rows,`employees-${today}.pdf`);
+}
+function exportExpPDF(){
+  const head=[t('التاريخ','Date'),t('الوصف','Description'),t('النوع','Type'),t('المبلغ','Amount'),t('مدفوع','Paid')];
+  const rows=state.expenses.map(e=>[e.date,e.desc,e.type,e.amt,e.paid]);
+  makePDF(t('تقرير المصروفات','Expense Report'),head,rows,`expenses-${today}.pdf`);
+}
+function exportFullPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({orientation:'landscape'});
+  doc.setFillColor(26,29,39); doc.rect(0,0,297,22,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont(undefined,'bold');
+  doc.text(t('التقرير الشامل','Full Report'),148,13,{align:'center'});
+  doc.setFontSize(9); doc.setTextColor(150,150,150);
+  doc.text('Salon Manager | '+today,148,19,{align:'center'});
+
+  const totalSalesAll=state.sales.reduce((a,s)=>a+totalSale(s),0);
+  const totalFin=state.salaryDetails.reduce((a,e)=>a+finalSalary(e),0);
+  const totalExp=state.expenses.reduce((a,e)=>a+(e.amt||0),0);
+  const shopTotal=Object.values(state.shopCosts).reduce((a,v)=>a+v,0);
+  const net=totalSalesAll-totalFin-totalExp-shopTotal;
+
+  doc.autoTable({head:[[t('المؤشر','Indicator'),t('القيمة','Value')]],body:[
+    [t('إجمالي المبيعات','Total Sales'),fmt(totalSalesAll)+' QAR'],
+    [t('إجمالي الرواتب','Total Salaries'),fmt(totalFin)+' QAR'],
+    [t('إجمالي المصروفات','Total Expenses'),fmt(totalExp)+' QAR'],
+    [t('تكاليف المتجر','Shop Costs'),fmt(shopTotal)+' QAR'],
+    [t('صافي الربح','Net Profit'),fmt(net)+' QAR'],
+  ],startY:25,styles:{fontSize:11},headStyles:{fillColor:[79,110,247]}});
+
+  doc.addPage();
+  doc.autoTable({head:[[t('التاريخ','Date'),t('الإجمالي','Total'),t('العملاء','Custs')]],body:state.sales.map(s=>[s.date,fmt(totalSale(s)),s.custs]),startY:10,styles:{fontSize:8},headStyles:{fillColor:[16,185,129]}});
+  doc.addPage();
+  doc.autoTable({head:[[t('الموظف','Emp'),t('الراتب','Base'),t('الخصومات','Ded'),t('النهائي','Final')]],body:state.salaryDetails.map(e=>[e.name,e.base,e.deductions,finalSalary(e)]),startY:10,headStyles:{fillColor:[245,158,11]}});
+  doc.save(`full-report-${today}.pdf`);
+  showToast(t('📦 تم تصدير التقرير الشامل PDF','📦 Full PDF exported'));
+}
+
+// ========== WHATSAPP ==========
+function buildReportText(type) {
+  const totalSalesAll=state.sales.reduce((a,s)=>a+totalSale(s),0);
+  const totalCashAll=state.sales.reduce((a,s)=>a+totalCash(s),0);
+  const totalCardAll=state.sales.reduce((a,s)=>a+totalCard(s),0);
+  const totalCusts=state.sales.reduce((a,s)=>a+(s.custs||0),0);
+  const totalFin=state.salaryDetails.reduce((a,e)=>a+finalSalary(e),0);
+  const totalExp=state.expenses.reduce((a,e)=>a+(e.amt||0),0);
+  const shopTotal=Object.values(state.shopCosts).reduce((a,v)=>a+v,0);
+  const net=totalSalesAll-totalFin-totalExp-shopTotal;
+
+  let msg='';
+  const divider='━━━━━━━━━━━━━━━━━━━━━━━━';
+
+  if(type==='daily'||type==='full'){
+    msg+=`✂️ *${t('تقرير المبيعات اليومية','Daily Sales Report')}*\n${divider}\n`;
+    msg+=`📅 ${today}\n\n`;
+    const last5=state.sales.slice(-5);
+    last5.forEach(s=>msg+=`• ${s.date}: *${fmt(totalSale(s))}* QAR (${s.custs} ${t('عملاء','custs')})\n`);
+    msg+=`\n💰 ${t('إجمالي المبيعات','Total Sales')}: *${fmt(totalSalesAll)} QAR*\n`;
+    msg+=`💵 ${t('نقد','Cash')}: ${fmt(totalCashAll)} | 💳 ${t('بطاقة','Card')}: ${fmt(totalCardAll)}\n`;
+    msg+=`👥 ${t('إجمالي العملاء','Total Custs')}: ${totalCusts}\n\n`;
+  }
+  if(type==='salary'||type==='full'){
+    msg+=`💰 *${t('ملخص الرواتب','Salary Summary')}*\n${divider}\n`;
+    state.salaryDetails.forEach(e=>msg+=`• ${e.name}: *${fmt(finalSalary(e))} QAR*\n`);
+    msg+=`📊 ${t('إجمالي الرواتب','Total')}: *${fmt(totalFin)} QAR*\n\n`;
+  }
+  if(type==='expenses'||type==='full'){
+    msg+=`🧾 *${t('المصروفات','Expenses')}*\n${divider}\n`;
+    state.expenses.slice(-5).forEach(e=>msg+=`• ${e.desc}: *${fmt(e.amt)} QAR*\n`);
+    msg+=`📊 ${t('إجمالي المصروفات','Total')}: *${fmt(totalExp)} QAR*\n\n`;
+  }
+  if(type==='full'){
+    msg+=`📈 *${t('صافي الربح','Net Profit')}*\n${divider}\n`;
+    msg+=`${net>=0?'✅':'⚠️'} *${fmt(net)} QAR*\n\n`;
+  }
+  msg+=`_${t('تم الإنشاء بواسطة صالون الإدارة','Generated by Salon Manager')} | ${today}_`;
+  return msg;
+}
+
+function shareReport(type){
+  const num=document.getElementById('waNumber')?.value?.replace(/\D/g,'')||'';
+  const msg=encodeURIComponent(buildReportText(type));
+  const url=num?`https://wa.me/${num}?text=${msg}`:`https://wa.me/?text=${msg}`;
+  window.open(url,'_blank');
+}
+
+// ========== AUTH GUARD ==========
+// تحقق من الجلسة عند تحميل الصفحة
+function checkSession() {
+  try {
+    const sess = JSON.parse(sessionStorage.getItem('salonSession')||'null');
+    if(!sess || sess.expires < Date.now()) {
+      window.location.href = 'login.html';
+      return null;
+    }
+    return sess;
+  } catch {
+    window.location.href = 'login.html';
+    return null;
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('salonSession');
+  window.location.href = 'login.html';
+}
+
+// تطبيق صلاحيات الكاشير — يُخفي الأقسام الحساسة
+function applyRolePermissions(role) {
+  const isCashier = role === 'cashier';
+  // إخفاء تبويبات الرواتب والتقارير للكاشير
+  document.querySelectorAll('[data-page="salary"],[data-page="reports"]').forEach(btn => {
+    btn.style.display = isCashier ? 'none' : '';
+  });
+  // تحديث Role badge في الإعدادات
+  const roleMap = {
+    manager: {icon:'👔', name: lang==='ar'?'المدير':'Manager', perms: lang==='ar'?'صلاحيات كاملة':'Full access'},
+    cashier:  {icon:'🖥️', name: lang==='ar'?'الكاشير':'Cashier',  perms: lang==='ar'?'صلاحيات محدودة':'Limited access'},
+  };
+  const r = roleMap[role]||roleMap.manager;
+  const iconEl = document.getElementById('roleIconBadge');
+  const nameEl = document.getElementById('roleNameDisplay');
+  const permsEl = document.getElementById('rolePermsDisplay');
+  const roleInfoEl = document.getElementById('currentRoleInfo');
+  if(iconEl) iconEl.textContent = r.icon;
+  if(nameEl) nameEl.textContent = r.name;
+  if(permsEl) permsEl.textContent = r.perms;
+  if(roleInfoEl) roleInfoEl.textContent = r.name;
+}
+
+function renderSettingsPage() {
+  // Browser info
+  const ua = navigator.userAgent;
+  const browser = ua.includes('Chrome')?'Chrome':ua.includes('Firefox')?'Firefox':ua.includes('Safari')?'Safari':'Browser';
+  const browserEl = document.getElementById('browserInfo');
+  if(browserEl) browserEl.textContent = browser;
+  // Storage size
+  const sz = (JSON.stringify(state).length/1024).toFixed(1);
+  const sEl = document.getElementById('storageInfoSmall');
+  if(sEl) sEl.textContent = sz+' KB';
+  // Last login
+  try {
+    const sess = JSON.parse(sessionStorage.getItem('salonSession')||'null');
+    const llEl = document.getElementById('lastLoginInfo');
+    if(llEl && sess) llEl.textContent = new Date(sess.ts).toLocaleTimeString(lang==='ar'?'ar':'en');
+  } catch {}
+}
+
+// ========== INIT ==========
+// toggle health expiry field
+document.querySelectorAll('input[name="eHealthCert"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    document.getElementById('eHealthExpWrap').style.display =
+      document.getElementById('eHealthYes').checked ? 'block' : 'none';
+  });
+});
+
+// ── تحقق من الجلسة قبل أي شيء ──
+const _session = checkSession();
+if(_session) applyRolePermissions(_session.role);
+
+initDB();
+updateOnlineStatus();
+// Service worker for offline (optional, registered if supported)
+if('serviceWorker' in navigator){
+  const swCode=`self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  // Not registering a real SW here since we're single-file
+}
+</script>
+</body>
+</html>

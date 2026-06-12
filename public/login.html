@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>تسجيل الدخول | Salon Login</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6ef7'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18'%3E✂%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#252838;--border:#2e3248;
+  --accent:#4f6ef7;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --text:#e2e8f0;--muted:#64748b;
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:20px;
+  background-image:radial-gradient(ellipse at 20% 50%,rgba(79,110,247,.08) 0%,transparent 60%),
+                   radial-gradient(ellipse at 80% 20%,rgba(124,58,237,.06) 0%,transparent 60%);
+}
+
+/* CARD */
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:36px 32px;width:100%;max-width:400px;
+  box-shadow:0 24px 64px rgba(0,0,0,.4);
+}
+.logo-wrap{text-align:center;margin-bottom:28px;}
+.logo-icon{font-size:48px;display:block;margin-bottom:8px;}
+.logo-title{font-size:22px;font-weight:800;color:var(--accent);}
+.logo-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* ROLE SELECTOR */
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+.role-tab{
+  padding:12px;border:2px solid var(--border);border-radius:12px;
+  background:var(--surface2);cursor:pointer;text-align:center;
+  transition:all .2s;
+}
+.role-tab:hover{border-color:var(--accent);}
+.role-tab.active{border-color:var(--accent);background:rgba(79,110,247,.12);}
+.role-tab .rt-icon{font-size:24px;display:block;margin-bottom:6px;}
+.role-tab .rt-label{font-size:13px;font-weight:700;}
+.role-tab .rt-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* PIN INPUT */
+.pin-section{margin-bottom:20px;}
+.pin-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.pin-dots{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
+.pin-dot{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--surface2);border:2px solid var(--border);
+  transition:all .2s;
+}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);transform:scale(1.15);}
+
+/* NUMPAD */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.numpad-btn{
+  padding:16px 10px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface2);color:var(--text);font-size:20px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.numpad-btn:hover{background:var(--border);border-color:var(--accent);}
+.numpad-btn:active{transform:scale(.94);background:rgba(79,110,247,.2);}
+.numpad-btn.del{font-size:18px;color:var(--muted);}
+.numpad-btn.enter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.numpad-btn.enter:hover{background:#3d5ce6;}
+
+/* ERROR */
+.pin-error{
+  text-align:center;font-size:12px;color:var(--red);
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
+  border-radius:8px;padding:8px;margin-bottom:12px;display:none;
+}
+.pin-error.show{display:block;}
+
+/* LANG */
+.lang-row{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);
+}
+.lang-btn{
+  padding:4px 10px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-family:inherit;
+}
+.lang-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* SHAKE animation */
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+.shake{animation:shake .4s ease;}
+
+/* LOADER */
+.login-loader{
+  display:none;position:fixed;inset:0;background:rgba(15,17,23,.8);
+  z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px;
+}
+.login-loader.show{display:flex;}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* FOOTER LINKS */
+.footer-links{display:flex;justify-content:center;gap:16px;margin-top:16px;}
+.footer-links a{font-size:11px;color:var(--muted);text-decoration:none;}
+.footer-links a:hover{color:var(--accent);}
+
+@media(max-width:400px){.login-card{padding:24px 18px;border-radius:16px;}.numpad-btn{padding:14px 8px;font-size:18px;}}
+</style>
+</head>
+<body>
+
+<div class="login-loader" id="loader">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--muted);" id="loaderMsg">جاري التحقق...</div>
+</div>
+
+<div class="login-card">
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <span class="logo-icon">✂️</span>
+    <div class="logo-title" id="logoTitle">صالون الإدارة</div>
+    <div class="logo-sub" id="logoSub">أدخل رقم PIN للدخول</div>
+  </div>
+
+  <!-- Role Selector -->
+  <div class="role-tabs">
+    <div class="role-tab active" id="roleManager" onclick="selectRole('manager')">
+      <span class="rt-icon">👔</span>
+      <div class="rt-label" id="lblManager">المدير</div>
+      <div class="rt-sub" id="lblManagerSub">صلاحيات كاملة</div>
+    </div>
+    <div class="role-tab" id="roleCashier" onclick="selectRole('cashier')">
+      <span class="rt-icon">🖥️</span>
+      <div class="rt-label" id="lblCashier">الكاشير</div>
+      <div class="rt-sub" id="lblCashierSub">صلاحيات محدودة</div>
+    </div>
+  </div>
+
+  <!-- PIN dots -->
+  <div class="pin-section">
+    <div class="pin-label">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <span id="pinLabel">رقم PIN</span>
+    </div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+      <div class="pin-dot" id="d4"></div>
+      <div class="pin-dot" id="d5"></div>
+    </div>
+    <div class="pin-error" id="pinError">❌ <span id="pinErrMsg">PIN غير صحيح. حاول مرة أخرى.</span></div>
+  </div>
+
+  <!-- Numpad -->
+  <div class="numpad" id="numpad">
+    <button class="numpad-btn" onclick="pressPin('1')">1</button>
+    <button class="numpad-btn" onclick="pressPin('2')">2</button>
+    <button class="numpad-btn" onclick="pressPin('3')">3</button>
+    <button class="numpad-btn" onclick="pressPin('4')">4</button>
+    <button class="numpad-btn" onclick="pressPin('5')">5</button>
+    <button class="numpad-btn" onclick="pressPin('6')">6</button>
+    <button class="numpad-btn" onclick="pressPin('7')">7</button>
+    <button class="numpad-btn" onclick="pressPin('8')">8</button>
+    <button class="numpad-btn" onclick="pressPin('9')">9</button>
+    <button class="numpad-btn del" onclick="delPin()">⌫</button>
+    <button class="numpad-btn" onclick="pressPin('0')">0</button>
+    <button class="numpad-btn enter" onclick="submitPin()">✓</button>
+  </div>
+
+  <!-- Lang + version -->
+  <div class="lang-row">
+    <span id="versionTxt">v3.0.0</span>
+    <button class="lang-btn" onclick="toggleLang()">EN / عر</button>
+  </div>
+</div>
+
+<!-- Footer links -->
+<div class="footer-links">
+  <a href="support.html" id="lnkSupport">الدعم</a>
+  <a href="privacy.html" id="lnkPrivacy">الخصوصية</a>
+  <a href="faq.html" id="lnkFaq">الأسئلة الشائعة</a>
+</div>
+
+<script>
+// ── الـ PIN المشفرة تُخزن في localStorage بواسطة صفحة Admin ──
+// الافتراضي: manager=123456 , cashier=0000  (يغيرها الـ Admin)
+const DEFAULT_PINS = { manager:'123456', cashier:'0000' };
+
+let currentLang = 'ar';
+let currentRole = 'manager';
+let enteredPin = '';
+const PIN_LENGTH = 6;
+
+// تعدد محاولات الإدخال الفاشلة
+let failCount = 0;
+let lockUntil = 0;
+
+const strings = {
+  ar:{
+    logoTitle:'صالون الإدارة', logoSub:'أدخل رقم PIN للدخول',
+    lblManager:'المدير', lblManagerSub:'صلاحيات كاملة',
+    lblCashier:'الكاشير', lblCashierSub:'صلاحيات محدودة',
+    pinLabel:'رقم PIN الشخصي',
+    wrongPin:'❌ PIN غير صحيح. حاول مرة أخرى.',
+    lockedPin:'🔒 محظور مؤقتاً. انتظر ',
+    lockedSec:' ثانية.',
+    loaderMsg:'جاري التحقق...', redirectMsg:'✅ مرحباً! جاري التوجيه...',
+    lnkSupport:'الدعم', lnkPrivacy:'الخصوصية', lnkFaq:'الأسئلة الشائعة',
+  },
+  en:{
+    logoTitle:'Salon Manager', logoSub:'Enter your PIN to continue',
+    lblManager:'Manager', lblManagerSub:'Full access',
+    lblCashier:'Cashier', lblCashierSub:'Limited access',
+    pinLabel:'Personal PIN',
+    wrongPin:'❌ Incorrect PIN. Try again.',
+    lockedPin:'🔒 Temporarily locked. Wait ',
+    lockedSec:' seconds.',
+    loaderMsg:'Verifying...', redirectMsg:'✅ Welcome! Redirecting...',
+    lnkSupport:'Support', lnkPrivacy:'Privacy', lnkFaq:'FAQ',
+  }
+};
+
+function s(k){ return strings[currentLang][k]||k; }
+
+function applyLang(){
+  const html = document.getElementById('html-root');
+  html.lang = currentLang; html.dir = currentLang==='ar'?'rtl':'ltr';
+  document.getElementById('logoTitle').textContent = s('logoTitle');
+  document.getElementById('logoSub').textContent = s('logoSub');
+  document.getElementById('lblManager').textContent = s('lblManager');
+  document.getElementById('lblManagerSub').textContent = s('lblManagerSub');
+  document.getElementById('lblCashier').textContent = s('lblCashier');
+  document.getElementById('lblCashierSub').textContent = s('lblCashierSub');
+  document.getElementById('pinLabel').textContent = s('pinLabel');
+  document.getElementById('lnkSupport').textContent = s('lnkSupport');
+  document.getElementById('lnkPrivacy').textContent = s('lnkPrivacy');
+  document.getElementById('lnkFaq').textContent = s('lnkFaq');
+}
+
+function toggleLang(){
+  currentLang = currentLang==='ar'?'en':'ar';
+  localStorage.setItem('salonLang', currentLang);
+  applyLang();
+}
+
+function selectRole(role){
+  currentRole = role;
+  enteredPin = '';
+  updateDots();
+  clearError();
+  document.getElementById('roleManager').classList.toggle('active', role==='manager');
+  document.getElementById('roleCashier').classList.toggle('active', role==='cashier');
+  // الكاشير PIN أقصر (4 أرقام)
+  updatePinLength(role==='cashier' ? 4 : 6);
+}
+
+function updatePinLength(len){
+  const dots = document.getElementById('pinDots');
+  dots.innerHTML = Array.from({length:len},(_,i)=>`<div class="pin-dot" id="d${i}"></div>`).join('');
+}
+
+function getPin(role){
+  try {
+    const stored = JSON.parse(localStorage.getItem('salonPins')||'{}');
+    return stored[role] || DEFAULT_PINS[role];
+  } catch { return DEFAULT_PINS[role]; }
+}
+
+function pressPin(digit){
+  const maxLen = currentRole==='cashier' ? 4 : 6;
+  if(enteredPin.length >= maxLen) return;
+  enteredPin += digit;
+  updateDots();
+  clearError();
+  // تأكيد تلقائي عند الوصول للطول الكامل
+  if(enteredPin.length === maxLen) setTimeout(submitPin, 200);
+}
+
+function delPin(){
+  enteredPin = enteredPin.slice(0,-1);
+  updateDots();
+  clearError();
+}
+
+function updateDots(){
+  const maxLen = currentRole==='cashier' ? 4 : 6;
+  for(let i=0;i<maxLen;i++){
+    const d = document.getElementById('d'+i);
+    if(d) d.classList.toggle('filled', i < enteredPin.length);
+  }
+}
+
+function clearError(){
+  document.getElementById('pinError').classList.remove('show');
+}
+
+function showError(msg){
+  const el = document.getElementById('pinError');
+  el.querySelector ? (el.innerHTML = msg) : null;
+  el.textContent = msg;
+  el.classList.add('show');
+  const dots = document.getElementById('pinDots');
+  dots.classList.add('shake');
+  setTimeout(()=>dots.classList.remove('shake'), 400);
+}
+
+function submitPin(){
+  // تحقق من الحظر المؤقت
+  if(Date.now() < lockUntil){
+    const sec = Math.ceil((lockUntil-Date.now())/1000);
+    showError(s('lockedPin')+sec+s('lockedSec'));
+    enteredPin=''; updateDots(); return;
+  }
+
+  const correct = getPin(currentRole);
+  if(enteredPin === correct){
+    // تسجيل الجلسة في sessionStorage
+    sessionStorage.setItem('salonSession', JSON.stringify({
+      role: currentRole,
+      ts: Date.now(),
+      expires: Date.now() + 8*60*60*1000  // 8 ساعات
+    }));
+    failCount = 0;
+    showLoader(s('redirectMsg'));
+    setTimeout(()=>{
+      window.location.href = 'index.html';
+    }, 800);
+  } else {
+    failCount++;
+    enteredPin = '';
+    updateDots();
+    if(failCount >= 5){
+      lockUntil = Date.now() + 30000; // حظر 30 ثانية
+      failCount = 0;
+      showError('🔒 '+s('lockedPin')+'30'+s('lockedSec'));
+    } else {
+      showError(s('wrongPin')+' ('+failCount+'/5)');
+    }
+  }
+}
+
+function showLoader(msg){
+  document.getElementById('loaderMsg').textContent = msg;
+  document.getElementById('loader').classList.add('show');
+}
+
+// لوحة مفاتيح حقيقية
+document.addEventListener('keydown', e=>{
+  if(e.key>='0'&&e.key<='9') pressPin(e.key);
+  else if(e.key==='Backspace') delPin();
+  else if(e.key==='Enter') submitPin();
+});
+
+// تحقق من الجلسة الموجودة
+function checkExistingSession(){
+  try {
+    const sess = JSON.parse(sessionStorage.getItem('salonSession')||'null');
+    if(sess && sess.expires > Date.now()){
+      showLoader('✅ جلسة نشطة — جاري التوجيه...');
+      setTimeout(()=>{ window.location.href='index.html'; }, 600);
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
+// Init
+currentLang = localStorage.getItem('salonLang')||'ar';
+applyLang();
+if(!checkExistingSession()){
+  selectRole('manager');
+}
+</script>
+</body>
+</html>

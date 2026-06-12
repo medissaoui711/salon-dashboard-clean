@@ -1,0 +1,19 @@
+{
+  "name": "salon-dashboard",
+  "version": "3.0.0",
+  "description": "Bilingual offline-first salon management dashboard — AR/EN, PIN auth, Excel/PDF export, WhatsApp sharing.",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve public -p 3000",
+    "preview": "npx serve public -p 4000",
+    "deploy:cf": "npx wrangler pages deploy public --project-name=salon-dashboard",
+    "deploy:vercel": "npx vercel --prod"
+  },
+  "keywords": ["dashboard", "salon", "arabic", "bilingual", "offline-first", "pwa", "pin-auth"],
+  "license": "MIT",
+  "engines": { "node": ">=18.0.0" },
+  "devDependencies": {
+    "serve": "^14.2.3",
+    "wrangler": "^3.0.0"
+  }
+}

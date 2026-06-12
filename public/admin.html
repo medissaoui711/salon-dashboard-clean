@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<title>لوحة Admin | Salon Super Admin</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c3aed'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18'%3E⚙%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0c12;--surface:#13151f;--surface2:#1e2130;--border:#252838;
+  --accent:#7c3aed;--accent2:#4f6ef7;--green:#10b981;--red:#ef4444;
+  --amber:#f59e0b;--text:#e2e8f0;--muted:#64748b;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh;}
+
+/* ADMIN AUTH GATE */
+#authGate{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:20px;
+  background:radial-gradient(ellipse at center,rgba(124,58,237,.12) 0%,transparent 70%);
+}
+.auth-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:36px 32px;width:100%;max-width:360px;text-align:center;
+}
+.auth-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:6px;}
+.auth-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.auth-input{
+  width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:16px;text-align:center;
+  letter-spacing:6px;font-family:monospace;outline:none;margin-bottom:12px;
+}
+.auth-input:focus{border-color:var(--accent);}
+.auth-btn{
+  width:100%;padding:10px;border-radius:10px;border:none;background:var(--accent);
+  color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.auth-btn:hover{background:#6d28d9;}
+.auth-error{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+.auth-error.show{display:block;}
+
+/* MAIN ADMIN UI */
+#adminUI{display:none;}
+
+/* NAV */
+nav{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;display:flex;align-items:center;gap:8px;
+  height:52px;position:sticky;top:0;z-index:50;
+}
+.nav-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:20px;background:rgba(124,58,237,.15);color:var(--accent);
+  border:1px solid rgba(124,58,237,.3);font-size:11px;font-weight:700;
+}
+.nav-logo{margin-inline-start:auto;font-size:14px;font-weight:800;color:var(--accent);}
+.tab-btn{padding:7px 14px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;border-radius:8px;transition:all .2s;font-family:inherit;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;}
+.tab-btn:hover:not(.active){background:var(--surface2);color:var(--text);}
+.logout-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* PAGE */
+.page{display:none;padding:24px;max-width:1100px;margin:0 auto;}
+.page.active{display:block;}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:18px;overflow:hidden;}
+.section-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.section-title{font-size:14px;font-weight:700;}
+.section-body{padding:20px;}
+
+/* PIN CARDS GRID */
+.pin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.pin-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px;
+}
+.pin-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.pin-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.pc-manager .pin-card-icon{background:rgba(124,58,237,.2);}
+.pc-cashier .pin-card-icon{background:rgba(79,110,247,.2);}
+.pin-card-title{font-size:14px;font-weight:700;}
+.pin-card-sub{font-size:11px;color:var(--muted);}
+.pin-display{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;font-family:monospace;font-size:22px;font-weight:800;
+  letter-spacing:8px;color:var(--accent);text-align:center;margin-bottom:12px;
+  cursor:pointer;user-select:all;transition:border-color .2s;
+}
+.pin-display:hover{border-color:var(--accent);}
+.pin-display.hidden span{letter-spacing:8px;color:var(--muted);}
+.pin-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6d28d9;}
+.btn-success{background:var(--green);color:#fff;}
+.btn-success:hover{background:#059669;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#dc2626;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--border);}
+.btn-amber{background:var(--amber);color:#000;font-weight:700;}
+.btn-amber:hover{background:#d97706;}
+.btn-sm{padding:4px 9px;font-size:11px;}
+
+/* STATUS badge */
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.status-active{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.status-frozen{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3);}
+.status-revoked{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+
+/* FORM */
+.form-row{margin-bottom:12px;}
+.form-row label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
+.form-row input,.form-row select,.form-row textarea{
+  width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;
+}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent);}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:500px){.form-2col{grid-template-columns:1fr;}}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.err{background:var(--red);}
+
+/* LOG TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--surface2);padding:8px 12px;text-align:right;color:var(--muted);font-weight:600;font-size:11px;}
+td{padding:8px 12px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+.kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.kpi .kl{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.kpi .kv{font-size:20px;font-weight:800;}
+.kpi.green .kv{color:var(--green);}
+.kpi.amber .kv{color:var(--amber);}
+.kpi.red .kv{color:var(--red);}
+.kpi.purple .kv{color:#a78bfa;}
+
+/* SETTINGS LIST */
+.settings-list{display:flex;flex-direction:column;gap:0;}
+.setting-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid var(--border);
+}
+.setting-item:last-child{border-bottom:none;}
+.si-left{display:flex;align-items:center;gap:10px;}
+.si-icon{width:34px;height:34px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.si-label{font-size:13px;font-weight:600;}
+.si-sub{font-size:11px;color:var(--muted);}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;border:none;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:21px;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ── AUTH GATE ── -->
+<div id="authGate">
+  <div class="auth-card">
+    <div style="font-size:52px;margin-bottom:12px;">🚫</div>
+    <div class="auth-title" style="color:var(--red);">403 — غير مصرح</div>
+    <div class="auth-sub" style="margin-top:8px;">
+      هذه الصفحة محمية.<br>الوصول عبر الرابط المخصص فقط.
+    </div>
+    <a href="login.html" style="display:inline-block;margin-top:20px;padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;text-decoration:none;">← العودة لتسجيل الدخول</a>
+  </div>
+</div>
+
+<!-- ── MAIN ADMIN UI ── -->
+<div id="adminUI">
+  <nav>
+    <div class="nav-badge">⚙️ Super Admin</div>
+    <button class="tab-btn active" onclick="showAdminPage('pins',this)">🔑 PIN Management</button>
+    <button class="tab-btn" onclick="showAdminPage('settings',this)">⚙️ الإعدادات</button>
+    <button class="tab-btn" onclick="showAdminPage('logs',this)">📋 سجل الدخول</button>
+    <button class="logout-btn" style="margin-inline-start:auto" onclick="adminLogout()">← خروج</button>
+    <div class="nav-logo">✂️ Admin</div>
+  </nav>
+
+  <!-- ── PAGE: PIN MANAGEMENT ── -->
+  <div class="page active" id="apage-pins">
+    <div class="kpi-row" id="adminKpis"></div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🔑 إدارة كودات PIN</span>
+        <button class="btn btn-primary" onclick="genAllPins()">🎲 توليد كودات جديدة</button>
+      </div>
+      <div class="section-body">
+        <div class="pin-grid">
+
+          <!-- Manager PIN -->
+          <div class="pin-card pc-manager">
+            <div class="pin-card-header">
+              <div class="pin-card-icon">👔</div>
+              <div>
+                <div class="pin-card-title">PIN المدير</div>
+                <div class="pin-card-sub">6 أرقام — صلاحيات كاملة</div>
+              </div>
+            </div>
+            <div id="mgrStatusRow" style="margin-bottom:10px;"></div>
+            <div class="pin-display" id="mgrPinDisplay" onclick="copyPin('manager')" title="انقر للنسخ">
+              <span id="mgrPinVal">••••••</span>
+            </div>
+            <div class="pin-actions">
+              <button class="btn btn-ghost btn-sm" onclick="togglePinView('manager')">👁 إظهار</button>
+              <button class="btn btn-primary btn-sm" onclick="genPin('manager')">🎲 توليد</button>
+              <button class="btn btn-success btn-sm" onclick="openSetPin('manager')">✏️ تخصيص</button>
+              <button class="btn btn-amber btn-sm" onclick="freezePin('manager')">🧊 تجميد</button>
+              <button class="btn btn-danger btn-sm" onclick="revokePin('manager')">🚫 إلغاء</button>
+            </div>
+          </div>
+
+          <!-- Cashier PIN -->
+          <div class="pin-card pc-cashier">
+            <div class="pin-card-header">
+              <div class="pin-card-icon">🖥️</div>
+              <div>
+                <div class="pin-card-title">PIN الكاشير</div>
+                <div class="pin-card-sub">4 أرقام — صلاحيات محدودة</div>
+              </div>
+            </div>
+            <div id="csrStatusRow" style="margin-bottom:10px;"></div>
+            <div class="pin-display" id="csrPinDisplay" onclick="copyPin('cashier')" title="انقر للنسخ">
+              <span id="csrPinVal">••••</span>
+            </div>
+            <div class="pin-actions">
+              <button class="btn btn-ghost btn-sm" onclick="togglePinView('cashier')">👁 إظهار</button>
+              <button class="btn btn-primary btn-sm" onclick="genPin('cashier')">🎲 توليد</button>
+              <button class="btn btn-success btn-sm" onclick="openSetPin('cashier')">✏️ تخصيص</button>
+              <button class="btn btn-amber btn-sm" onclick="freezePin('cashier')">🧊 تجميد</button>
+              <button class="btn btn-danger btn-sm" onclick="revokePin('cashier')">🚫 إلغاء</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Set PIN form (hidden by default) -->
+        <div id="setPinForm" style="display:none;margin-top:18px;background:var(--surface2);border-radius:12px;padding:18px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;" id="setPinTitle">تخصيص PIN</div>
+          <div class="form-row">
+            <label>PIN الجديد</label>
+            <input type="number" id="newPinInput" placeholder="أدخل الأرقام فقط"
+              style="font-size:20px;letter-spacing:6px;font-family:monospace;text-align:center;"
+              oninput="validatePinInput()">
+          </div>
+          <div id="pinInputHint" style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:10px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-success" onclick="saveCustomPin()">✅ حفظ PIN</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('setPinForm').style.display='none'">إلغاء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Permissions matrix -->
+    <div class="section">
+      <div class="section-header"><span class="section-title">🛡️ مصفوفة الصلاحيات</span></div>
+      <div class="section-body">
+        <table>
+          <thead><tr>
+            <th>الميزة</th>
+            <th>المدير 👔</th>
+            <th>الكاشير 🖥️</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>عرض لوحة التحكم</td><td>✅</td><td>✅</td></tr>
+            <tr><td>تعديل المبيعات اليومية</td><td>✅</td><td>✅ إضافة فقط</td></tr>
+            <tr><td>تعديل بيانات الموظفين</td><td>✅</td><td>❌</td></tr>
+            <tr><td>عرض وتعديل الرواتب</td><td>✅</td><td>❌</td></tr>
+            <tr><td>إدارة المصروفات</td><td>✅</td><td>✅ إضافة فقط</td></tr>
+            <tr><td>تصدير التقارير</td><td>✅</td><td>❌</td></tr>
+            <tr><td>مشاركة WhatsApp</td><td>✅</td><td>❌</td></tr>
+            <tr><td>النسخ الاحتياطي</td><td>✅</td><td>❌</td></tr>
+            <tr><td>الوصول لـ Admin Panel</td><td>❌</td><td>❌</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: SETTINGS ── -->
+  <div class="page" id="apage-settings">
+    <div class="section">
+      <div class="section-header"><span class="section-title">⚙️ إعدادات لوحة التحكم</span></div>
+      <div class="section-body">
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">🏪</div>
+              <div>
+                <div class="si-label">اسم الصالون</div>
+                <div class="si-sub" id="salonNameDisplay">صالون الإدارة</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="editSetting('salonName','اسم الصالون')">تعديل</button>
+          </div>
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">💱</div>
+              <div>
+                <div class="si-label">العملة</div>
+                <div class="si-sub" id="currencyDisplay">QAR — ريال قطري</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="editSetting('currency','العملة')">تعديل</button>
+          </div>
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">📊</div>
+              <div>
+                <div class="si-label">نسبة راتب الموظف من المبيعات</div>
+                <div class="si-sub" id="salaryPctDisplay">35%</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="editSetting('salaryPct','نسبة الراتب %')">تعديل</button>
+          </div>
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">⏱️</div>
+              <div>
+                <div class="si-label">مدة الجلسة (ساعات)</div>
+                <div class="si-sub" id="sessionHrsDisplay">8 ساعات</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="editSetting('sessionHrs','مدة الجلسة')">تعديل</button>
+          </div>
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">🔑</div>
+              <div>
+                <div class="si-label">كود Admin Panel</div>
+                <div class="si-sub">كلمة السر للوصول لهذه الصفحة</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="changeAdminKey()">تغيير الكود</button>
+          </div>
+          <div class="setting-item">
+            <div class="si-left">
+              <div class="si-icon">🌐</div>
+              <div>
+                <div class="si-label">اللغة الافتراضية</div>
+                <div class="si-sub" id="defaultLangDisplay">عربي (AR)</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="editSetting('defaultLang','اللغة')">تعديل</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inline edit form -->
+    <div id="settingEditForm" style="display:none;" class="section">
+      <div class="section-header"><span class="section-title" id="settingEditTitle">تعديل</span></div>
+      <div class="section-body">
+        <div class="form-row">
+          <label id="settingEditLabel">القيمة</label>
+          <input type="text" id="settingEditInput">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-success" onclick="saveSetting()">حفظ</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('settingEditForm').style.display='none'">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links to other pages -->
+    <div class="section">
+      <div class="section-header"><span class="section-title">🔗 صفحات مساعدة</span></div>
+      <div class="section-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+        <a href="support.html" style="text-decoration:none;">
+          <button class="btn btn-ghost">💬 صفحة الدعم</button>
+        </a>
+        <a href="privacy.html" style="text-decoration:none;">
+          <button class="btn btn-ghost">🔒 سياسة الخصوصية</button>
+        </a>
+        <a href="faq.html" style="text-decoration:none;">
+          <button class="btn btn-ghost">❓ الأسئلة الشائعة</button>
+        </a>
+        <a href="login.html" style="text-decoration:none;">
+          <button class="btn btn-ghost">🔑 صفحة تسجيل الدخول</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: LOGS ── -->
+  <div class="page" id="apage-logs">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📋 سجل دخول المستخدمين</span>
+        <button class="btn btn-danger btn-sm" onclick="clearLogs()">🗑️ مسح السجل</button>
+      </div>
+      <div class="section-body">
+        <div class="tbl-wrap" style="overflow-x:auto;">
+          <table>
+            <thead><tr>
+              <th>التاريخ والوقت</th><th>الدور</th><th>النتيجة</th><th>ملاحظة</th>
+            </tr></thead>
+            <tbody id="logsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// طريقة الدخول: الرابط يجب أن يحتوي على #medpanel
+// مثال: admin.html#medpanel
+// أي رابط آخر → إعادة توجيه فورية لصفحة login
+// ══════════════════════════════════════════════════════════════
+const ADMIN_HASH = 'medpanel';
+
+function checkHashAuth() {
+  const hash = window.location.hash.replace('#','').trim().toLowerCase();
+  if(hash === ADMIN_HASH) {
+    // ✅ الهاش صحيح — امسح الهاش من الـ URL (لا يظهر في سجل المتصفح)
+    history.replaceState(null, '', window.location.pathname);
+    sessionStorage.setItem('adminAuth','1');
+    return true;
+  }
+  return false;
+}
+
+// إذا الجلسة موجودة بالفعل → ادخل مباشرة
+// إذا الهاش صحيح → سجّل الجلسة وادخل
+// غير ذلك → 403 block لا توجيه (حتى لا يُكشف وجود الصفحة)
+(function init() {
+  const hasSession = sessionStorage.getItem('adminAuth') === '1';
+  const hasHash    = checkHashAuth();
+
+  if(hasSession || hasHash) {
+    document.getElementById('authGate').style.display = 'none';
+    document.getElementById('adminUI').style.display  = 'block';
+    if(hasSession || hasHash) initAdmin();
+  }
+  // إذا لا جلسة ولا هاش: يبقى authGate ظاهراً مع رسالة 403
+})();
+
+function adminLogout(){
+  sessionStorage.removeItem('adminAuth');
+  // إعادة التوجيه لـ login — لا يعود للـ admin بدون الهاش
+  window.location.href = 'login.html';
+}
+
+// ── PIN State ──
+function getPins(){
+  try { return JSON.parse(localStorage.getItem('salonPins')||'{}'); }
+  catch { return {}; }
+}
+function savePins(pins){ localStorage.setItem('salonPins',JSON.stringify(pins)); }
+function getPinStatus(role){
+  const st = JSON.parse(localStorage.getItem('salonPinStatus')||'{}');
+  return st[role]||'active';
+}
+function setPinStatus(role,status){
+  const st = JSON.parse(localStorage.getItem('salonPinStatus')||'{}');
+  st[role]=status;
+  localStorage.setItem('salonPinStatus',JSON.stringify(st));
+}
+
+// ── PIN visibility toggle ──
+const pinVisible = {manager:false, cashier:false};
+
+function togglePinView(role){
+  pinVisible[role] = !pinVisible[role];
+  renderPinCard(role);
+}
+
+function renderPinCard(role){
+  const pins = getPins();
+  const status = getPinStatus(role);
+  const pin = pins[role] || (role==='manager'?'123456':'0000');
+  const displayEl = document.getElementById(role==='manager'?'mgrPinVal':'csrPinVal');
+  const statusEl  = document.getElementById(role==='manager'?'mgrStatusRow':'csrStatusRow');
+
+  displayEl.textContent = pinVisible[role] ? pin : '•'.repeat(pin.length);
+
+  const statusMap = {
+    active:{cls:'status-active',label:'● نشط'},
+    frozen:{cls:'status-frozen',label:'🧊 مجمد'},
+    revoked:{cls:'status-revoked',label:'🚫 ملغى'},
+  };
+  const s = statusMap[status]||statusMap.active;
+  statusEl.innerHTML = `<span class="status-badge ${s.cls}">${s.label}</span>`;
+}
+
+function copyPin(role){
+  const pins = getPins();
+  const pin = pins[role]||(role==='manager'?'123456':'0000');
+  navigator.clipboard.writeText(pin).then(()=>toast('📋 تم نسخ PIN: '+pin));
+}
+
+function genPin(role){
+  const len = role==='cashier'?4:6;
+  const pin = Array.from({length:len},()=>Math.floor(Math.random()*10)).join('');
+  const pins = getPins(); pins[role]=pin; savePins(pins);
+  setPinStatus(role,'active');
+  renderPinCard(role); renderKpis();
+  pinVisible[role]=true; renderPinCard(role);
+  addLog(role,'admin','تم توليد PIN جديد');
+  toast('🎲 PIN جديد: '+pin);
+}
+
+function genAllPins(){
+  genPin('manager'); genPin('cashier');
+  toast('✅ تم توليد كودات جديدة للمدير والكاشير');
+}
+
+let currentSetRole='';
+function openSetPin(role){
+  currentSetRole=role;
+  const len=role==='cashier'?4:6;
+  document.getElementById('setPinTitle').textContent=`تخصيص PIN — ${role==='manager'?'المدير':'الكاشير'} (${len} أرقام)`;
+  document.getElementById('newPinInput').value='';
+  document.getElementById('newPinInput').maxLength=len;
+  document.getElementById('pinInputHint').textContent=`أدخل ${len} أرقام بالضبط`;
+  document.getElementById('setPinForm').style.display='block';
+  document.getElementById('newPinInput').focus();
+}
+
+function validatePinInput(){
+  const role=currentSetRole;
+  const len=role==='cashier'?4:6;
+  const val=document.getElementById('newPinInput').value;
+  const hint=document.getElementById('pinInputHint');
+  const num=/^\d+$/.test(val);
+  if(!num&&val) hint.textContent='❌ أرقام فقط';
+  else if(val.length<len) hint.textContent=`${val.length}/${len} أرقام`;
+  else hint.textContent='✅ صحيح';
+}
+
+function saveCustomPin(){
+  const role=currentSetRole;
+  const len=role==='cashier'?4:6;
+  const val=document.getElementById('newPinInput').value;
+  if(!/^\d+$/.test(val)||val.length!==len){
+    toast('❌ أدخل '+len+' أرقام فقط',true); return;
+  }
+  const pins=getPins(); pins[role]=val; savePins(pins);
+  setPinStatus(role,'active');
+  pinVisible[role]=true;
+  document.getElementById('setPinForm').style.display='none';
+  renderPinCard(role); renderKpis();
+  addLog(role,'admin','تم تخصيص PIN يدوياً');
+  toast('✅ تم حفظ PIN الجديد');
+}
+
+function freezePin(role){
+  if(!confirm(`تجميد PIN ${role==='manager'?'المدير':'الكاشير'}؟`)) return;
+  setPinStatus(role,'frozen');
+  renderPinCard(role);
+  addLog(role,'admin','تم تجميد PIN');
+  toast('🧊 تم تجميد PIN');
+}
+
+function revokePin(role){
+  if(!confirm(`إلغاء PIN ${role==='manager'?'المدير':'الكاشير'} نهائياً؟`)) return;
+  setPinStatus(role,'revoked');
+  renderPinCard(role);
+  addLog(role,'admin','تم إلغاء PIN');
+  toast('🚫 تم إلغاء PIN',true);
+}
+
+function renderKpis(){
+  const pins=getPins();
+  const mgrStatus=getPinStatus('manager');
+  const csrStatus=getPinStatus('cashier');
+  const logs=getLogs();
+  const todayLogs=logs.filter(l=>l.ts.startsWith(new Date().toLocaleDateString('ar')));
+  document.getElementById('adminKpis').innerHTML=`
+    <div class="kpi green"><div class="kl">حالة PIN المدير</div><div class="kv" style="font-size:14px;">${{active:'✅ نشط',frozen:'🧊 مجمد',revoked:'🚫 ملغى'}[mgrStatus]||'—'}</div></div>
+    <div class="kpi purple"><div class="kl">حالة PIN الكاشير</div><div class="kv" style="font-size:14px;">${{active:'✅ نشط',frozen:'🧊 مجمد',revoked:'🚫 ملغى'}[csrStatus]||'—'}</div></div>
+    <div class="kpi amber"><div class="kl">دخولات اليوم</div><div class="kv">${todayLogs.length}</div></div>
+    <div class="kpi"><div class="kl">إجمالي السجلات</div><div class="kv">${logs.length}</div></div>
+  `;
+}
+
+// ── SETTINGS ──
+const SETTINGS_MAP={
+  salonName:{el:'salonNameDisplay',suffix:''},
+  currency:{el:'currencyDisplay',suffix:''},
+  salaryPct:{el:'salaryPctDisplay',suffix:'%'},
+  sessionHrs:{el:'sessionHrsDisplay',suffix:' ساعات'},
+  defaultLang:{el:'defaultLangDisplay',suffix:''},
+};
+let currentSettingKey='';
+
+function getSettings(){
+  try{return JSON.parse(localStorage.getItem('salonSettings')||'{}');}catch{return {};}
+}
+function saveSettings(s){ localStorage.setItem('salonSettings',JSON.stringify(s)); }
+
+function editSetting(key,label){
+  currentSettingKey=key;
+  const settings=getSettings();
+  const defaults={salonName:'صالون الإدارة',currency:'QAR',salaryPct:'35',sessionHrs:'8',defaultLang:'ar'};
+  document.getElementById('settingEditTitle').textContent='تعديل: '+label;
+  document.getElementById('settingEditLabel').textContent=label;
+  document.getElementById('settingEditInput').value=settings[key]||defaults[key]||'';
+  document.getElementById('settingEditForm').style.display='block';
+  document.getElementById('settingEditInput').focus();
+}
+
+function saveSetting(){
+  const settings=getSettings();
+  settings[currentSettingKey]=document.getElementById('settingEditInput').value;
+  saveSettings(settings);
+  renderSettings();
+  document.getElementById('settingEditForm').style.display='none';
+  toast('✅ تم حفظ الإعداد');
+}
+
+function renderSettings(){
+  const settings=getSettings();
+  const defaults={salonName:'صالون الإدارة',currency:'QAR — ريال قطري',salaryPct:'35',sessionHrs:'8',defaultLang:'عربي (AR)'};
+  Object.keys(SETTINGS_MAP).forEach(k=>{
+    const el=document.getElementById(SETTINGS_MAP[k].el);
+    if(el) el.textContent=(settings[k]||defaults[k]||'—')+(SETTINGS_MAP[k].suffix||'');
+  });
+}
+
+function changeAdminKey(){
+  const newKey=prompt('أدخل كود Admin الجديد (8 أحرف على الأقل):');
+  if(!newKey||newKey.length<4){toast('❌ الكود قصير جداً',true);return;}
+  localStorage.setItem('salonAdminKey',newKey);
+  toast('✅ تم تغيير كود Admin');
+}
+
+// ── LOGS ──
+function getLogs(){
+  try{return JSON.parse(localStorage.getItem('salonLoginLogs')||'[]');}catch{return[];}
+}
+function addLog(role,result,note){
+  const logs=getLogs();
+  logs.unshift({ts:new Date().toLocaleString('ar'),role,result,note});
+  if(logs.length>200) logs.pop();
+  localStorage.setItem('salonLoginLogs',JSON.stringify(logs));
+}
+function renderLogs(){
+  const logs=getLogs();
+  document.getElementById('logsTbody').innerHTML=logs.map(l=>`<tr>
+    <td style="color:var(--muted);font-size:11px;">${l.ts}</td>
+    <td>${l.role==='manager'?'👔 مدير':'🖥️ كاشير'}</td>
+    <td>${l.result==='admin'?'⚙️ Admin':l.result==='success'?'✅ نجح':'❌ فشل'}</td>
+    <td style="color:var(--muted);font-size:11px;">${l.note||'—'}</td>
+  </tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">لا توجد سجلات</td></tr>';
+}
+function clearLogs(){
+  if(confirm('مسح كل سجلات الدخول؟')){
+    localStorage.removeItem('salonLoginLogs');
+    renderLogs();
+    toast('🗑️ تم مسح السجل');
+  }
+}
+
+// ── TOAST ──
+function toast(msg,err=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(err?' err':'');
+  setTimeout(()=>t.className='toast',2500);
+}
+
+// ── PAGES ──
+function showAdminPage(p,btn){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('apage-'+p).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(p==='logs') renderLogs();
+}
+
+// ── INIT ──
+function initAdmin(){
+  renderPinCard('manager');
+  renderPinCard('cashier');
+  renderKpis();
+  renderSettings();
+  // سجل دخول Admin
+  addLog('admin','admin','دخول Admin Panel');
+}
+
+if(sessionStorage.getItem('adminAuth')==='1') initAdmin();
+</script>
+</body>
+</html>
