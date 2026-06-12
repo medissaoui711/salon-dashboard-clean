@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="html-root">
+<html lang="en" dir="ltr" id="html-root">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0f1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Salon Dashboard">
+<meta name="apple-mobile-web-app-title" content="Salon Manager">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="لوحة تحكم إدارة الصالون — ثنائية اللغة، تعمل بدون إنترنت">
-<title>لوحة تحكم المبيعات | Sales Dashboard</title>
+<meta name="description" content="Bilingual salon management dashboard — works offline">
+<title>Salon Manager | Sales Dashboard</title>
 <!-- Inline SVG favicon -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6ef7'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='18'%3E✂%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%234f6ef7'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-size='100'%3E✂%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.json">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -281,34 +282,34 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
 <!-- NAV -->
 <nav>
   <button class="tab-btn active" data-page="dashboard" onclick="showPage('dashboard',this)">
-    <span class="t" data-ar="🏠 الرئيسية" data-en="🏠 Dashboard">🏠 الرئيسية</span>
+    <span class="t" data-ar="🏠 الرئيسية" data-en="🏠 Dashboard">🏠 Dashboard</span>
   </button>
   <button class="tab-btn" data-page="daily" onclick="showPage('daily',this)">
-    <span class="t" data-ar="📅 المبيعات" data-en="📅 Sales">📅 المبيعات</span>
+    <span class="t" data-ar="📅 المبيعات" data-en="📅 Sales">📅 Sales</span>
   </button>
   <button class="tab-btn" data-page="employees" onclick="showPage('employees',this)">
-    <span class="t" data-ar="👥 الموظفون" data-en="👥 Employees">👥 الموظفون</span>
+    <span class="t" data-ar="👥 الموظفون" data-en="👥 Employees">👥 Employees</span>
   </button>
   <button class="tab-btn" data-page="salary" onclick="showPage('salary',this)">
-    <span class="t" data-ar="💰 الرواتب" data-en="💰 Salaries">💰 الرواتب</span>
+    <span class="t" data-ar="💰 الرواتب" data-en="💰 Salaries">💰 Salaries</span>
   </button>
   <button class="tab-btn" data-page="expenses" onclick="showPage('expenses',this)">
-    <span class="t" data-ar="🧾 المصروفات" data-en="🧾 Expenses">🧾 المصروفات</span>
+    <span class="t" data-ar="🧾 المصروفات" data-en="🧾 Expenses">🧾 Expenses</span>
   </button>
   <button class="tab-btn" data-page="reports" onclick="showPage('reports',this)">
-    <span class="t" data-ar="📤 التقارير" data-en="📤 Reports">📤 التقارير</span>
+    <span class="t" data-ar="📤 التقارير" data-en="📤 Reports">📤 Reports</span>
   </button>
   <button class="tab-btn" data-page="settings" onclick="showPage('settings',this)">
-    <span class="t" data-ar="⚙️ الإعدادات" data-en="⚙️ Settings">⚙️ الإعدادات</span>
+    <span class="t" data-ar="⚙️ الإعدادات" data-en="⚙️ Settings">⚙️ Settings</span>
   </button>
   <div class="nav-tools">
     <div class="offline-badge" id="onlineBadge">
-      <span>●</span><span class="t" data-ar="متصل" data-en="Online">متصل</span>
+      <span>●</span><span class="t" data-ar="متصل" data-en="Online">Online</span>
     </div>
     <button class="lang-btn" onclick="toggleLang()">EN / عر</button>
-    <button class="lang-btn" onclick="doLogout()" style="color:#ef4444;border-color:rgba(239,68,68,.3);" title="خروج">⏻</button>
+    <button class="lang-btn" onclick="doLogout()" style="color:#ef4444;border-color:rgba(239,68,68,.3);" title="Logout">⏻</button>
   </div>
-  <div class="nav-logo">✂️ <span class="t" data-ar="صالون الإدارة" data-en="Salon Manager">صالون الإدارة</span></div>
+  <div class="nav-logo">✂️ <span class="t" data-ar="صالون الإدارة" data-en="Salon Manager">Salon Manager</span></div>
 </nav>
 
 <!-- TOAST -->
@@ -338,9 +339,9 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
       <div class="section-header">
         <span class="section-title t" data-ar="📈 اتجاه المبيعات اليومية" data-en="📈 Daily Sales Trend">📈 اتجاه المبيعات اليومية</span>
         <select id="chartFilter" onchange="renderDashboard()" style="padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;">
-          <option value="all" class="t" data-ar="كل الأيام" data-en="All Days">كل الأيام</option>
-          <option value="15" class="t" data-ar="آخر 15 يوم" data-en="Last 15 Days">آخر 15 يوم</option>
-          <option value="7" class="t" data-ar="آخر 7 أيام" data-en="Last 7 Days">آخر 7 أيام</option>
+          <option value="all" class="t" data-ar="كل الأيام" data-en="All Days">All Days</option>
+          <option value="15" class="t" data-ar="آخر 15 يوم" data-en="Last 15 Days">Last 15 Days</option>
+          <option value="7" class="t" data-ar="آخر 7 أيام" data-en="Last 7 Days">Last 7 Days</option>
         </select>
       </div>
       <div class="section-body"><div class="chart-wrap-tall"><canvas id="chartDaily"></canvas></div></div>
@@ -417,7 +418,7 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
       <div class="export-row">
         <button class="btn btn-primary" onclick="openAddEmp()">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span class="t" data-ar="إضافة موظف" data-en="Add Employee">إضافة موظف</span>
+          <span class="t" data-ar="إضافة موظف" data-en="Add Employee">Add Employee</span>
         </button>
         <button class="btn btn-success btn-sm" onclick="exportEmpExcel()">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -491,7 +492,7 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
     <div class="section-body">
       <div class="tbl-wrap">
         <table><thead id="expHead"></thead><tbody id="expTbody"></tbody>
-          <tfoot><tr class="total-row"><td colspan="3" style="text-align:right;font-weight:700;" class="t" data-ar="الإجمالي" data-en="Total">الإجمالي</td><td id="expTotal" style="color:var(--red);font-weight:700;"></td><td></td><td></td></tr></tfoot>
+          <tfoot><tr class="total-row"><td colspan="3" style="text-align:right;font-weight:700;" class="t" data-ar="الإجمالي" data-en="Total">Total</td><td id="expTotal" style="color:var(--red);font-weight:700;"></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
     </div>
@@ -503,7 +504,7 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
   <div class="section" style="margin-bottom:18px;">
     <div class="section-header">
       <span class="section-title t" data-ar="💾 التخزين المحلي والمزامنة" data-en="💾 Local Storage & Sync">💾 التخزين المحلي والمزامنة</span>
-      <div class="sync-row"><div class="sync-dot"></div><span class="t" data-ar="البيانات محفوظة محلياً" data-en="Data saved locally">البيانات محفوظة محلياً</span></div>
+      <div class="sync-row"><div class="sync-dot"></div><span class="t" data-ar="البيانات محفوظة محلياً" data-en="Data saved locally">Data saved locally</span></div>
     </div>
     <div class="section-body">
       <div class="storage-info" id="storageInfo"></div>
@@ -520,10 +521,10 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
     <div class="section">
       <div class="section-header"><span class="section-title t" data-ar="📊 تصدير Excel" data-en="📊 Export Excel">📊 تصدير Excel</span></div>
       <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn-success" onclick="exportDailyExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المبيعات اليومية" data-en="Daily Sales Report">تقرير المبيعات اليومية</span></button>
-        <button class="btn btn-success" onclick="exportSalaryExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الرواتب" data-en="Salary Report">تقرير الرواتب</span></button>
-        <button class="btn btn-success" onclick="exportEmpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الموظفين" data-en="Employee Report">تقرير الموظفين</span></button>
-        <button class="btn btn-success" onclick="exportExpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المصروفات" data-en="Expenses Report">تقرير المصروفات</span></button>
+        <button class="btn btn-success" onclick="exportDailyExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المبيعات اليومية" data-en="Daily Sales Report">Daily Sales Report</span></button>
+        <button class="btn btn-success" onclick="exportSalaryExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الرواتب" data-en="Salary Report">Salary Report</span></button>
+        <button class="btn btn-success" onclick="exportEmpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير الموظفين" data-en="Employee Report">Employee Report</span></button>
+        <button class="btn btn-success" onclick="exportExpExcel()" style="width:100%;justify-content:center;">⬇️ <span class="t" data-ar="تقرير المصروفات" data-en="Expenses Report">Expenses Report</span></button>
         <button class="btn btn-amber" onclick="exportFullExcel()" style="width:100%;justify-content:center;">📦 <span class="t" data-ar="تصدير شامل (كل التقارير)" data-en="Full Export (All Reports)">تصدير شامل</span></button>
       </div>
     </div>
@@ -531,11 +532,11 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
     <div class="section">
       <div class="section-header"><span class="section-title t" data-ar="📄 تصدير PDF" data-en="📄 Export PDF">📄 تصدير PDF</span></div>
       <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn-danger" onclick="exportDailyPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المبيعات PDF" data-en="Daily Sales PDF">تقرير المبيعات PDF</span></button>
-        <button class="btn btn-danger" onclick="exportSalaryPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الرواتب PDF" data-en="Salary Report PDF">تقرير الرواتب PDF</span></button>
-        <button class="btn btn-danger" onclick="exportEmpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الموظفين PDF" data-en="Employee Report PDF">تقرير الموظفين PDF</span></button>
-        <button class="btn btn-danger" onclick="exportExpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المصروفات PDF" data-en="Expenses Report PDF">تقرير المصروفات PDF</span></button>
-        <button class="btn btn-amber" onclick="exportFullPDF()" style="width:100%;justify-content:center;">📦 <span class="t" data-ar="تقرير شامل PDF" data-en="Full PDF Report">تقرير شامل PDF</span></button>
+        <button class="btn btn-danger" onclick="exportDailyPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المبيعات PDF" data-en="Daily Sales PDF">Daily Sales PDF</span></button>
+        <button class="btn btn-danger" onclick="exportSalaryPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الرواتب PDF" data-en="Salary Report PDF">Salary Report PDF</span></button>
+        <button class="btn btn-danger" onclick="exportEmpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير الموظفين PDF" data-en="Employee Report PDF">Employee Report PDF</span></button>
+        <button class="btn btn-danger" onclick="exportExpPDF()" style="width:100%;justify-content:center;">📄 <span class="t" data-ar="تقرير المصروفات PDF" data-en="Expenses Report PDF">Expenses Report PDF</span></button>
+        <button class="btn btn-amber" onclick="exportFullPDF()" style="width:100%;justify-content:center;">📦 <span class="t" data-ar="تقرير شامل PDF" data-en="Full PDF Report">Full PDF Report</span></button>
       </div>
     </div>
   </div>
@@ -548,12 +549,12 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
         <input type="text" id="waNumber" placeholder="+966XXXXXXXXX" value="">
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-wa" onclick="shareReport('daily')">📲 <span class="t" data-ar="مشاركة تقرير المبيعات" data-en="Share Sales Report">مشاركة تقرير المبيعات</span></button>
-        <button class="btn btn-wa" onclick="shareReport('salary')">📲 <span class="t" data-ar="مشاركة تقرير الرواتب" data-en="Share Salary Report">مشاركة تقرير الرواتب</span></button>
-        <button class="btn btn-wa" onclick="shareReport('expenses')">📲 <span class="t" data-ar="مشاركة تقرير المصروفات" data-en="Share Expenses Report">مشاركة تقرير المصروفات</span></button>
-        <button class="btn btn-wa" onclick="shareReport('full')">📲 <span class="t" data-ar="مشاركة التقرير الشامل" data-en="Share Full Report">مشاركة التقرير الشامل</span></button>
+        <button class="btn btn-wa" onclick="shareReport('daily')">📲 <span class="t" data-ar="مشاركة تقرير المبيعات" data-en="Share Sales Report">Share Sales Report</span></button>
+        <button class="btn btn-wa" onclick="shareReport('salary')">📲 <span class="t" data-ar="مشاركة تقرير الرواتب" data-en="Share Salary Report">Share Salary Report</span></button>
+        <button class="btn btn-wa" onclick="shareReport('expenses')">📲 <span class="t" data-ar="مشاركة تقرير المصروفات" data-en="Share Expenses Report">Share Expenses Report</span></button>
+        <button class="btn btn-wa" onclick="shareReport('full')">📲 <span class="t" data-ar="مشاركة التقرير الشامل" data-en="Share Full Report">Share Full Report</span></button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px;" class="t" data-ar="* يفتح WhatsApp Web تلقائياً مع محتوى التقرير" data-en="* Opens WhatsApp Web automatically with report content">* يفتح WhatsApp Web تلقائياً مع محتوى التقرير</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;" class="t" data-ar="* يفتح WhatsApp Web تلقائياً مع محتوى التقرير" data-en="* Opens WhatsApp Web automatically with report content">* Opens WhatsApp Web automatically with report content</div>
     </div>
   </div>
 </div>
@@ -563,32 +564,32 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
 <div class="page" id="page-settings">
   <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;">
     <div id="roleIconBadge" style="width:38px;height:38px;border-radius:10px;background:rgba(79,110,247,.15);display:flex;align-items:center;justify-content:center;font-size:20px;">👔</div>
-    <div><div style="font-size:14px;font-weight:700;" id="roleNameDisplay">المدير</div><div style="font-size:11px;color:var(--muted);" id="rolePermsDisplay">صلاحيات كاملة</div></div>
-    <button class="btn btn-danger btn-sm" style="margin-inline-start:auto;" onclick="doLogout()">⏻ <span class="t" data-ar="تسجيل الخروج" data-en="Logout">تسجيل الخروج</span></button>
+    <div><div style="font-size:14px;font-weight:700;" id="roleNameDisplay">Manager</div><div style="font-size:11px;color:var(--muted);" id="rolePermsDisplay">Full access</div></div>
+    <button class="btn btn-danger btn-sm" style="margin-inline-start:auto;" onclick="doLogout()">⏻ <span class="t" data-ar="تسجيل الخروج" data-en="Logout">Logout</span></button>
   </div>
   <div class="grid2">
     <div class="section">
-      <div class="section-header"><span class="section-title">🔗 <span class="t" data-ar="صفحات مساعدة" data-en="Quick Links">صفحات مساعدة</span></span></div>
+      <div class="section-header"><span class="section-title">🔗 <span class="t" data-ar="صفحات مساعدة" data-en="Quick Links">Quick Links</span></span></div>
       <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
-        <a href="support.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='#25D366'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">💬</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الدعم الفني" data-en="Support">الدعم الفني</div><div style="font-size:11px;color:var(--muted);" class="t" data-ar="تواصل مع فريق الدعم" data-en="Contact support">تواصل مع فريق الدعم</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
-        <a href="privacy.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">🔒</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</div><div style="font-size:11px;color:var(--muted);">Privacy Policy</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
-        <a href="faq.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">❓</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</div><div style="font-size:11px;color:var(--muted);">Frequently Asked Questions</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+        <a href="support.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='#25D366'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">💬</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الدعم الفني" data-en="Support">Support</div><div style="font-size:11px;color:var(--muted);" class="t" data-ar="تواصل مع فريق الدعم" data-en="Contact support">Contact support</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+        <a href="privacy.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">🔒</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="سياسة الخصوصية" data-en="Privacy Policy">Privacy Policy</div><div style="font-size:11px;color:var(--muted);">Privacy Policy</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
+        <a href="faq.html" style="text-decoration:none;"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border)'"><span style="font-size:20px;">❓</span><div><div style="font-weight:600;font-size:13px;" class="t" data-ar="الأسئلة الشائعة" data-en="FAQ">FAQ</div><div style="font-size:11px;color:var(--muted);">Frequently Asked Questions</div></div><span style="margin-inline-start:auto;color:var(--muted);">←</span></div></a>
 
       </div>
     </div>
     <div class="section">
-      <div class="section-header"><span class="section-title">ℹ️ <span class="t" data-ar="عن التطبيق" data-en="About">عن التطبيق</span></span></div>
+      <div class="section-header"><span class="section-title">ℹ️ <span class="t" data-ar="عن التطبيق" data-en="About">About</span></span></div>
       <div class="section-body">
         <div style="text-align:center;padding:12px 0 18px;">
           <div style="font-size:42px;margin-bottom:8px;">✂️</div>
-          <div style="font-size:17px;font-weight:800;color:var(--accent);" class="t" data-ar="صالون الإدارة" data-en="Salon Manager">صالون الإدارة</div>
+          <div style="font-size:17px;font-weight:800;color:var(--accent);" class="t" data-ar="صالون الإدارة" data-en="Salon Manager">Salon Manager</div>
           <div style="font-size:11px;color:var(--muted);margin-top:3px;">v3.0.0 · Bilingual · Offline-first</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:0;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="المتصفح" data-en="Browser">المتصفح</span><span id="browserInfo">—</span></div>
-          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="حجم البيانات" data-en="Data size">حجم البيانات</span><span id="storageInfoSmall">—</span></div>
-          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="آخر دخول" data-en="Last login">آخر دخول</span><span id="lastLoginInfo">—</span></div>
-          <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="color:var(--muted);" class="t" data-ar="الدور الحالي" data-en="Current role">الدور الحالي</span><span id="currentRoleInfo" style="color:var(--accent);">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="المتصفح" data-en="Browser">Browser</span><span id="browserInfo">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="حجم البيانات" data-en="Data size">Data size</span><span id="storageInfoSmall">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);" class="t" data-ar="آخر دخول" data-en="Last login">Last login</span><span id="lastLoginInfo">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="color:var(--muted);" class="t" data-ar="الدور الحالي" data-en="Current role">Current role</span><span id="currentRoleInfo" style="color:var(--accent);">—</span></div>
         </div>
       </div>
     </div>
@@ -600,21 +601,21 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
   <div class="modal">
     <h3 class="t" data-ar="➕ إضافة سجل مبيعات" data-en="➕ Add Sales Record">➕ إضافة سجل مبيعات</h3>
     <input type="hidden" id="saleIdx">
-    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">التاريخ</label><input type="date" id="sDate"></div>
+    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">Date</label><input type="date" id="sDate"></div>
     <div class="form-2col">
-      <div class="form-row"><label>محمد - نقد</label><input type="number" id="sMoh_c" min="0" value="0"></div>
-      <div class="form-row"><label>محمد - بطاقة</label><input type="number" id="sMoh_k" min="0" value="0"></div>
-      <div class="form-row"><label>شاري - نقد</label><input type="number" id="sSha_c" min="0" value="0"></div>
-      <div class="form-row"><label>شاري - بطاقة</label><input type="number" id="sSha_k" min="0" value="0"></div>
-      <div class="form-row"><label>ريزوان - نقد</label><input type="number" id="sRiz_c" min="0" value="0"></div>
-      <div class="form-row"><label>ريزوان - بطاقة</label><input type="number" id="sRiz_k" min="0" value="0"></div>
-      <div class="form-row"><label>أزيم - نقد</label><input type="number" id="sAze_c" min="0" value="0"></div>
-      <div class="form-row"><label>أزيم - بطاقة</label><input type="number" id="sAze_k" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="محمد - نقد" data-en="Mohammad - Cash">Mohammad - Cash</label><input type="number" id="sMoh_c" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="محمد - بطاقة" data-en="Mohammad - Card">Mohammad - Card</label><input type="number" id="sMoh_k" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="شاري - نقد" data-en="Shari - Cash">Shari - Cash</label><input type="number" id="sSha_c" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="شاري - بطاقة" data-en="Shari - Card">Shari - Card</label><input type="number" id="sSha_k" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="ريزوان - نقد" data-en="Rizwan - Cash">Rizwan - Cash</label><input type="number" id="sRiz_c" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="ريزوان - بطاقة" data-en="Rizwan - Card">Rizwan - Card</label><input type="number" id="sRiz_k" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="أزيم - نقد" data-en="Azeem - Cash">Azeem - Cash</label><input type="number" id="sAze_c" min="0" value="0"></div>
+      <div class="form-row"><label class="t" data-ar="أزيم - بطاقة" data-en="Azeem - Card">Azeem - Card</label><input type="number" id="sAze_k" min="0" value="0"></div>
     </div>
-    <div class="form-row"><label class="t" data-ar="عدد العملاء" data-en="Customers">عدد العملاء</label><input type="number" id="sCusts" min="0" value="0"></div>
+    <div class="form-row"><label class="t" data-ar="عدد العملاء" data-en="Customers">Customers</label><input type="number" id="sCusts" min="0" value="0"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalSale')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
-      <button class="btn btn-primary" onclick="saveSale()"><span class="t" data-ar="حفظ" data-en="Save">حفظ</span></button>
+      <button class="btn btn-ghost" onclick="closeModal('modalSale')"><span class="t" data-ar="إلغاء" data-en="Cancel">Cancel</span></button>
+      <button class="btn btn-primary" onclick="saveSale()"><span class="t" data-ar="حفظ" data-en="Save">Save</span></button>
     </div>
   </div>
 </div>
@@ -637,11 +638,11 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
     <!-- Name row -->
     <div class="form-2col">
       <div class="form-row">
-        <label class="t" data-ar="الاسم الأول" data-en="First Name">الاسم الأول</label>
+        <label class="t" data-ar="الاسم الأول" data-en="First Name">First Name</label>
         <input type="text" id="eFirstName" placeholder="محمد">
       </div>
       <div class="form-row">
-        <label class="t" data-ar="الاسم الأخير" data-en="Last Name">الاسم الأخير</label>
+        <label class="t" data-ar="الاسم الأخير" data-en="Last Name">Last Name</label>
         <input type="text" id="eLastName" placeholder="علي">
       </div>
     </div>
@@ -653,7 +654,7 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
         <input type="text" id="eIdNumber" placeholder="28501234567890">
       </div>
       <div class="form-row">
-        <label class="t" data-ar="تاريخ انتهاء الهوية" data-en="ID Expiry Date">تاريخ انتهاء الهوية</label>
+        <label class="t" data-ar="تاريخ انتهاء الهوية" data-en="ID Expiry Date">ID Expiry Date</label>
         <input type="date" id="eIdExpiry">
       </div>
     </div>
@@ -662,16 +663,16 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
     <div style="background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:12px;">
       <div style="font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span class="t" data-ar="الشهادة الصحية" data-en="Health Certificate">الشهادة الصحية</span>
+        <span class="t" data-ar="الشهادة الصحية" data-en="Health Certificate">Health Certificate</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;">
           <input type="radio" name="eHealthCert" id="eHealthYes" value="yes" style="accent-color:var(--green);">
-          <span style="color:var(--green);font-weight:600;" class="t" data-ar="✅ نعم" data-en="✅ Yes">✅ نعم</span>
+          <span style="color:var(--green);font-weight:600;" class="t" data-ar="✅ نعم" data-en="✅ Yes">✅ Yes</span>
         </label>
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;">
           <input type="radio" name="eHealthCert" id="eHealthNo" value="no" style="accent-color:var(--red);" checked>
-          <span style="color:var(--red);font-weight:600;" class="t" data-ar="❌ لا" data-en="❌ No">❌ لا</span>
+          <span style="color:var(--red);font-weight:600;" class="t" data-ar="❌ لا" data-en="❌ No">❌ No</span>
         </label>
         <div id="eHealthExpWrap" style="display:none;flex:1;min-width:140px;">
           <input type="date" id="eHealthExpiry" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;">
@@ -691,23 +692,23 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
       </div>
     </div>
     <div class="form-row">
-      <label class="t" data-ar="الحالة" data-en="Status">الحالة</label>
+      <label class="t" data-ar="الحالة" data-en="Status">Status</label>
       <select id="eStatus">
-        <option value="نشط">نشط / Active</option>
-        <option value="إجازة">إجازة / Leave</option>
-        <option value="غائب">غائب / Absent</option>
+        <option value="نشط" class="t" data-ar="نشط / Active" data-en="Active">Active</option>
+        <option value="إجازة" class="t" data-ar="إجازة / Leave" data-en="Leave">Leave</option>
+        <option value="غائب" class="t" data-ar="غائب / Absent" data-en="Absent">Absent</option>
       </select>
     </div>
 
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalEmp')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
+      <button class="btn btn-ghost" onclick="closeModal('modalEmp')"><span class="t" data-ar="إلغاء" data-en="Cancel">Cancel</span></button>
       <button class="btn btn-danger btn-sm" id="eDeleteBtn" style="display:none" onclick="deleteEmpFromModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        <span class="t" data-ar="حذف" data-en="Delete">حذف</span>
+        <span class="t" data-ar="حذف" data-en="Delete">Delete</span>
       </button>
       <button class="btn btn-primary" onclick="saveEmp()">
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        <span class="t" data-ar="حفظ" data-en="Save">حفظ</span>
+        <span class="t" data-ar="حفظ" data-en="Save">Save</span>
       </button>
     </div>
   </div>
@@ -717,32 +718,32 @@ td.editable input{background:var(--surface2);border:1px solid var(--accent);colo
   <div class="modal">
     <h3 class="t" data-ar="🧾 مصروف" data-en="🧾 Expense">🧾 مصروف</h3>
     <input type="hidden" id="expIdx">
-    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">التاريخ</label><input type="date" id="expDate"></div>
-    <div class="form-row"><label class="t" data-ar="الوصف" data-en="Description">الوصف</label><input type="text" id="expDesc"></div>
-    <div class="form-row"><label class="t" data-ar="النوع" data-en="Type">النوع</label>
+    <div class="form-row"><label class="t" data-ar="التاريخ" data-en="Date">Date</label><input type="date" id="expDate"></div>
+    <div class="form-row"><label class="t" data-ar="الوصف" data-en="Description">Description</label><input type="text" id="expDesc"></div>
+    <div class="form-row"><label class="t" data-ar="النوع" data-en="Type">Type</label>
       <select id="expType">
-        <option value="product" class="t" data-ar="مصروف منتج" data-en="Product Expense">مصروف منتج</option>
-        <option value="daily" class="t" data-ar="مصروف يومي" data-en="Daily Expense">مصروف يومي</option>
-        <option value="receivable" class="t" data-ar="مستحقات شهرية" data-en="Monthly Receivable">مستحقات شهرية</option>
+        <option value="product" class="t" data-ar="مصروف منتج" data-en="Product Expense">Product Expense</option>
+        <option value="daily" class="t" data-ar="مصروف يومي" data-en="Daily Expense">Daily Expense</option>
+        <option value="receivable" class="t" data-ar="مستحقات شهرية" data-en="Monthly Receivable">Monthly Receivable</option>
       </select>
     </div>
     <div class="form-row"><label class="t" data-ar="المبلغ (QAR)" data-en="Amount (QAR)">المبلغ</label><input type="number" id="expAmt" min="0"></div>
-    <div class="form-row"><label class="t" data-ar="مدفوع؟" data-en="Paid?">مدفوع؟</label>
+    <div class="form-row"><label class="t" data-ar="مدفوع؟" data-en="Paid?">Paid?</label>
       <select id="expPaid">
-        <option value="نعم" class="t" data-ar="نعم" data-en="Yes">نعم</option>
-        <option value="لا" class="t" data-ar="لا" data-en="No">لا</option>
+        <option value="نعم" class="t" data-ar="نعم" data-en="Yes">Yes</option>
+        <option value="لا" class="t" data-ar="لا" data-en="No">No</option>
       </select>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalExp')"><span class="t" data-ar="إلغاء" data-en="Cancel">إلغاء</span></button>
-      <button class="btn btn-primary" onclick="saveExp()"><span class="t" data-ar="حفظ" data-en="Save">حفظ</span></button>
+      <button class="btn btn-ghost" onclick="closeModal('modalExp')"><span class="t" data-ar="إلغاء" data-en="Cancel">Cancel</span></button>
+      <button class="btn btn-primary" onclick="saveExp()"><span class="t" data-ar="حفظ" data-en="Save">Save</span></button>
     </div>
   </div>
 </div>
 
 <script>
 // ========== STATE ==========
-let lang = 'ar';
+let lang = 'en';
 let state = {
   sales: [
     {date:'2026-04-01',moh_c:127,moh_k:190,sha_c:100,sha_k:55,riz_c:110,riz_k:80,aze_c:25,aze_k:0,custs:19},
@@ -866,13 +867,19 @@ window.addEventListener('offline', updateOnlineStatus);
 // ========== LANG ==========
 function toggleLang() {
   lang = lang==='ar' ? 'en' : 'ar';
+  localStorage.setItem('salonLang', lang);
+  applyLang();
+  renderAll();
+}
+
+function applyLang() {
   const html = document.getElementById('html-root');
   html.lang = lang;
   html.dir = lang==='ar' ? 'rtl' : 'ltr';
+  document.title = lang==='ar' ? 'لوحة التحكم | Salon Manager' : 'Salon Manager | Dashboard';
   document.querySelectorAll('.t[data-'+lang+']').forEach(el => {
     el.textContent = el.getAttribute('data-'+lang);
   });
-  renderAll();
 }
 
 function t(ar, en) { return lang==='ar' ? ar : en; }
@@ -921,12 +928,6 @@ function renderAll() {
   applyLang();
   const sess = JSON.parse(sessionStorage.getItem('salonSession')||'null');
   if(sess) applyRolePermissions(sess.role);
-}
-
-function applyLang() {
-  document.querySelectorAll('.t[data-'+lang+']').forEach(el=>{
-    el.textContent = el.getAttribute('data-'+lang);
-  });
 }
 
 // ========== DASHBOARD ==========
@@ -1091,7 +1092,7 @@ function renderDailyTable() {
 
   // إخفاء أزرار Export/WhatsApp/حذف في header المبيعات للكاشير
   document.querySelectorAll('#page-daily .section-header .btn-success, #page-daily .section-header .btn-danger, #page-daily .section-header .btn-wa').forEach(btn => {
-    const isSafeAddBtn = btn.getAttribute('onclick') === 'openAddSale()' || btn.textContent.includes('إضافة') || btn.textContent.includes('Add');
+    const isSafeAddBtn = btn.getAttribute('onclick') === 'openAddSale()' || btn.textContent.includes('إضافة') || btn.textContent.includes('Add') || btn.innerHTML.includes('إضافة') || btn.innerHTML.includes('Add');
     btn.style.display = (isC && !isSafeAddBtn) ? 'none' : '';
   });
 
@@ -1274,7 +1275,7 @@ function renderEmpTable() {
         : `<span class="exp-badge exp-expired">❌ ${t('لا','No')}</span>`}
       </td>
       <td>${fmt(e.baseSalary)} QAR</td>
-      <td><span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status}</span></td>
+      <td><span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status==='نشط'?t('نشط','Active'):e.status==='إجازة'?t('إجازة','Leave'):t('غائب','Absent')}</span></td>
       ${!isC ? `<td><button class="btn btn-ghost btn-sm" onclick="openEditEmp(${i})">${t('تعديل','Edit')}</button></td>` : ''}
     </tr>`;
   }).join('');
@@ -1323,7 +1324,7 @@ function renderEmpProfiles() {
           <div class="epc-fullname">${empFullName(e)}</div>
           <div class="epc-id">${t('هوية','ID')}: ${e.idNumber||'—'}</div>
           <div style="margin-top:5px;">
-            <span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status}</span>
+            <span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status==='نشط'?t('نشط','Active'):e.status==='إجازة'?t('إجازة','Leave'):t('غائب','Absent')}</span>
           </div>
         </div>
         <div class="epc-status-dot">
@@ -1412,7 +1413,7 @@ function openAddEmp() {
   document.getElementById('eHealthExpWrap').style.display = 'none';
   document.getElementById('eBaseSalary').value = 500;
   document.getElementById('eIncentive').value = 0;
-  document.getElementById('eStatus').value = 'نشط';
+  document.getElementById('eStatus').value = 'نشط'; // value stays Arabic (data value), display is translated
   document.getElementById('ePhotoPreview').style.display = 'none';
   document.getElementById('ePhotoPlaceholder').style.display = 'flex';
   document.getElementById('ePhotoInput').value = '';
@@ -1527,7 +1528,7 @@ function renderExpenses() {
       <td>${e.date}</td><td>${e.desc}</td>
       <td><span class="exp-type ${clsMap[e.type]||''}">${typeMap[e.type]||e.type}</span></td>
       <td style="color:var(--red);font-weight:600;">${fmt(e.amt)} QAR</td>
-      <td><span class="badge ${e.paid==='نعم'?'cash':'card'}">${e.paid}</span></td>
+      <td><span class="badge ${e.paid==='نعم'?'cash':'card'}">${e.paid==='نعم'?t('نعم','Yes'):t('لا','No')}</span></td>
       ${!isC ? `<td><button class="btn btn-danger btn-sm" onclick="deleteExp(${i})">✕</button></td>` : ''}
     </tr>`;
   }).join('');
@@ -1865,16 +1866,22 @@ document.querySelectorAll('input[name="eHealthCert"]').forEach(r=>{
   });
 });
 
+// ── تحميل اللغة المحفوظة (افتراضي: EN) ──
+lang = localStorage.getItem('salonLang') || 'en';
+
 // ── تحقق من الجلسة قبل أي شيء ──
 const _session = checkSession();
 if(_session) applyRolePermissions(_session.role);
 
 initDB();
 updateOnlineStatus();
-// Service worker for offline (optional, registered if supported)
-if('serviceWorker' in navigator){
-  const swCode=`self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
-  // Not registering a real SW here since we're single-file
+// ── PWA: Service Worker Registration ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[SW] Registered, scope:', reg.scope))
+      .catch(err => console.log('[SW] Registration failed:', err));
+  });
 }
 </script>
 </body>
