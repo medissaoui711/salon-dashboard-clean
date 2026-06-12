@@ -1077,6 +1077,7 @@ function editShopCost(el, key) {
 
 // ========== DAILY TABLE ==========
 function renderDailyTable() {
+  const isC = _cashierHideOnRender;
   const head = document.getElementById('dailyHead');
   head.innerHTML = `<tr>
     <th>${t('التاريخ','Date')}</th>
@@ -1084,8 +1085,15 @@ function renderDailyTable() {
     <th>${t('شاري-نقد','Sha-Cash')}</th><th>${t('شاري-بطاقة','Sha-Card')}</th>
     <th>${t('ريزوان-نقد','Riz-Cash')}</th><th>${t('ريزوان-بطاقة','Riz-Card')}</th>
     <th>${t('أزيم-نقد','Aze-Cash')}</th><th>${t('أزيم-بطاقة','Aze-Card')}</th>
-    <th>${t('الإجمالي','Total')}</th><th>${t('العملاء','Custs')}</th><th>${t('متوسط','Avg')}</th><th></th>
+    <th>${t('الإجمالي','Total')}</th><th>${t('العملاء','Custs')}</th><th>${t('متوسط','Avg')}</th>
+    ${!isC ? '<th></th>' : ''}
   </tr>`;
+
+  // إخفاء أزرار Export/WhatsApp/حذف في header المبيعات للكاشير
+  document.querySelectorAll('#page-daily .section-header .btn-success, #page-daily .section-header .btn-danger, #page-daily .section-header .btn-wa').forEach(btn => {
+    const isSafeAddBtn = btn.getAttribute('onclick') === 'openAddSale()' || btn.textContent.includes('إضافة') || btn.textContent.includes('Add');
+    btn.style.display = (isC && !isSafeAddBtn) ? 'none' : '';
+  });
 
   const q = (document.getElementById('srchDaily')?.value||'').toLowerCase();
   const tbody = document.getElementById('dailyTbody');
@@ -1096,16 +1104,18 @@ function renderDailyTable() {
     ['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].forEach(k=>tot[k]+=(s[k]||0));
     tot.total+=total; tot.custs+=(s.custs||0);
     const isCash=f=>f.endsWith('_c');
+    // الكاشير: عرض فقط، لا تعديل، لا حذف
     rows+=`<tr>
       <td>${s.date}</td>
-      ${['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].map(f=>`
-        <td class="editable" onclick="editCell(this,${i},'${f}')">
-          <span class="badge ${isCash(f)?'cash':'card'}">${s[f]||0}</span>
-        </td>`).join('')}
+      ${['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].map(f=>
+        isC ? `<td><span class="badge ${isCash(f)?'cash':'card'}">${s[f]||0}</span></td>`
+            : `<td class="editable" onclick="editCell(this,${i},'${f}')"><span class="badge ${isCash(f)?'cash':'card'}">${s[f]||0}</span></td>`
+      ).join('')}
       <td style="font-weight:700;color:var(--green)">${fmt(total)}</td>
-      <td class="editable" onclick="editCell(this,${i},'custs')">${s.custs||0}</td>
+      ${isC ? `<td>${s.custs||0}</td>`
+            : `<td class="editable" onclick="editCell(this,${i},'custs')">${s.custs||0}</td>`}
       <td>${avg}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteSale(${i})">✕</button></td>
+      ${!isC ? `<td><button class="btn btn-danger btn-sm" onclick="deleteSale(${i})">✕</button></td>` : ''}
     </tr>`;
   });
   const avgAll=tot.custs?(tot.total/tot.custs).toFixed(1):'-';
@@ -1113,7 +1123,8 @@ function renderDailyTable() {
     <td>${t('الإجمالي','Total')}</td>
     ${['moh_c','moh_k','sha_c','sha_k','riz_c','riz_k','aze_c','aze_k'].map(k=>`<td>${fmt(tot[k])}</td>`).join('')}
     <td style="color:var(--green)">${fmt(tot.total)}</td>
-    <td>${tot.custs}</td><td>${avgAll}</td><td></td>
+    <td>${tot.custs}</td><td>${avgAll}</td>
+    ${!isC ? '<td></td>' : ''}
   </tr>`;
   tbody.innerHTML=rows;
 }
@@ -1232,12 +1243,19 @@ function empFullName(e) {
 }
 
 function renderEmpTable() {
+  const isC = _cashierHideOnRender;
   document.getElementById('empHead').innerHTML=`<tr>
     <th>#</th><th>${t('الصورة','Photo')}</th><th>${t('الاسم','Name')}</th>
     <th>${t('الهوية','ID')}</th><th>${t('انتهاء الهوية','ID Expiry')}</th>
     <th>${t('الشهادة الصحية','Health Cert')}</th>
-    <th>${t('الراتب','Salary')}</th><th>${t('الحالة','Status')}</th><th></th>
+    <th>${t('الراتب','Salary')}</th><th>${t('الحالة','Status')}</th>
+    ${!isC ? '<th></th>' : ''}
   </tr>`;
+
+  // إخفاء زر إضافة موظف + Export للكاشير
+  document.querySelectorAll('#page-employees .section-header .btn').forEach(btn => {
+    btn.style.display = isC ? 'none' : '';
+  });
 
   document.getElementById('empTbody').innerHTML = state.employees.map((e,i)=>{
     const idExp = expiryStatus(e.idExpiry);
@@ -1257,7 +1275,7 @@ function renderEmpTable() {
       </td>
       <td>${fmt(e.baseSalary)} QAR</td>
       <td><span class="badge ${e.status==='نشط'?'active':'leave'}">${e.status}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="openEditEmp(${i})">${t('تعديل','Edit')}</button></td>
+      ${!isC ? `<td><button class="btn btn-ghost btn-sm" onclick="openEditEmp(${i})">${t('تعديل','Edit')}</button></td>` : ''}
     </tr>`;
   }).join('');
 
@@ -1265,6 +1283,7 @@ function renderEmpTable() {
 }
 
 function renderEmpProfiles() {
+  const isC = _cashierHideOnRender;
   const grid = document.getElementById('empProfilesGrid');
   const alerts = document.getElementById('empAlerts');
 
@@ -1298,7 +1317,7 @@ function renderEmpProfiles() {
       <div class="epc-header">
         <div class="epc-avatar-wrap">
           ${photoEl}
-          <div class="epc-avatar-edit" onclick="openEditEmp(${i})" title="${t('تعديل الصورة','Edit photo')}">✏️</div>
+          ${!isC ? `<div class="epc-avatar-edit" onclick="openEditEmp(${i})" title="${t('تعديل الصورة','Edit photo')}">✏️</div>` : ''}
         </div>
         <div class="epc-info">
           <div class="epc-fullname">${empFullName(e)}</div>
@@ -1343,7 +1362,7 @@ function renderEmpProfiles() {
           <span class="efc-val" style="color:var(--accent);">${fmt(e.incentive)} QAR</span>
         </div>
       </div>
-      <div class="epc-actions">
+      <div class="epc-actions" style="${isC?'display:none':''}">
         <button class="btn btn-ghost" onclick="openEditEmp(${i})">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           ${t('تعديل','Edit')}
@@ -1487,12 +1506,20 @@ function deleteEmp(i) {
 
 // ========== EXPENSES ==========
 function renderExpenses() {
+  const isC = _cashierHideOnRender;
   const typeMap={product:t('مصروف منتج','Product'),daily:t('مصروف يومي','Daily'),receivable:t('مستحقات','Receivable')};
   const clsMap={product:'exp-product',daily:'exp-daily',receivable:'exp-receivable'};
   document.getElementById('expHead').innerHTML=`<tr>
     <th>${t('التاريخ','Date')}</th><th>${t('الوصف','Description')}</th><th>${t('النوع','Type')}</th>
-    <th>${t('المبلغ','Amount')}</th><th>${t('مدفوع','Paid')}</th><th></th>
+    <th>${t('المبلغ','Amount')}</th><th>${t('مدفوع','Paid')}</th>
+    ${!isC ? '<th></th>' : ''}
   </tr>`;
+
+  // إخفاء Export/WhatsApp للكاشير — يبقى زر إضافة مصروف فقط
+  document.querySelectorAll('#page-expenses .section-header .btn-success, #page-expenses .section-header .btn-danger, #page-expenses .section-header .btn-wa').forEach(btn => {
+    btn.style.display = isC ? 'none' : '';
+  });
+
   let total=0;
   document.getElementById('expTbody').innerHTML=state.expenses.map((e,i)=>{
     total+=e.amt||0;
@@ -1501,7 +1528,7 @@ function renderExpenses() {
       <td><span class="exp-type ${clsMap[e.type]||''}">${typeMap[e.type]||e.type}</span></td>
       <td style="color:var(--red);font-weight:600;">${fmt(e.amt)} QAR</td>
       <td><span class="badge ${e.paid==='نعم'?'cash':'card'}">${e.paid}</span></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteExp(${i})">✕</button></td>
+      ${!isC ? `<td><button class="btn btn-danger btn-sm" onclick="deleteExp(${i})">✕</button></td>` : ''}
     </tr>`;
   }).join('');
   document.getElementById('expTotal').textContent=fmt(total)+' QAR';
@@ -1739,24 +1766,76 @@ function doLogout() {
 // تطبيق صلاحيات الكاشير — يُخفي الأقسام الحساسة
 function applyRolePermissions(role) {
   const isCashier = role === 'cashier';
-  // إخفاء تبويبات الرواتب والتقارير للكاشير
+
+  // ═══════════════════════════════════════════════════
+  // 1. إخفاء التبويبات الممنوعة للكاشير
+  // ═══════════════════════════════════════════════════
+  // الرواتب والتقارير مخفيان كاملاً
   document.querySelectorAll('[data-page="salary"],[data-page="reports"]').forEach(btn => {
     btn.style.display = isCashier ? 'none' : '';
   });
-  // تحديث Role badge في الإعدادات
+
+  if (!isCashier) return; // المدير لا قيود عليه
+
+  // ═══════════════════════════════════════════════════
+  // 2. صفحة المبيعات — إخفاء أزرار Export + WhatsApp
+  //    والحذف يُعطَّل لاحقاً في renderDailyTable
+  // ═══════════════════════════════════════════════════
+  _cashierHideOnRender = true; // flag لـ renderDailyTable
+
+  // ═══════════════════════════════════════════════════
+  // 3. صفحة الموظفين — إخفاء أزرار الإضافة/التعديل/الحذف
+  //    + Export
+  // ═══════════════════════════════════════════════════
+  // سيتم تطبيقه في renderEmpTable عبر _cashierHideOnRender
+
+  // ═══════════════════════════════════════════════════
+  // 4. Dashboard — تعطيل تعديل تكاليف المتجر
+  // ═══════════════════════════════════════════════════
+  // نُعيد تعريف editShopCost بحيث لا تفعل شيئاً للكاشير
+  window._shopCostLocked = true;
+
+  // ═══════════════════════════════════════════════════
+  // 5. صفحة المصروفات — إخفاء الحذف + Export + WhatsApp
+  // ═══════════════════════════════════════════════════
+  // سيتم تطبيقه في renderExpenses
+
+  // ═══════════════════════════════════════════════════
+  // 6. تحديث Role badge
+  // ═══════════════════════════════════════════════════
   const roleMap = {
-    manager: {icon:'👔', name: lang==='ar'?'المدير':'Manager', perms: lang==='ar'?'صلاحيات كاملة':'Full access'},
-    cashier:  {icon:'🖥️', name: lang==='ar'?'الكاشير':'Cashier',  perms: lang==='ar'?'صلاحيات محدودة':'Limited access'},
+    manager: {icon:'👔', name: lang==='ar'?'المدير':'Manager',   perms: lang==='ar'?'صلاحيات كاملة':'Full access'},
+    cashier:  {icon:'🖥️', name: lang==='ar'?'الكاشير':'Cashier', perms: lang==='ar'?'إضافة مبيعات ومصروفات فقط':'Add sales & expenses only'},
   };
-  const r = roleMap[role]||roleMap.manager;
-  const iconEl = document.getElementById('roleIconBadge');
-  const nameEl = document.getElementById('roleNameDisplay');
-  const permsEl = document.getElementById('rolePermsDisplay');
-  const roleInfoEl = document.getElementById('currentRoleInfo');
-  if(iconEl) iconEl.textContent = r.icon;
-  if(nameEl) nameEl.textContent = r.name;
-  if(permsEl) permsEl.textContent = r.perms;
-  if(roleInfoEl) roleInfoEl.textContent = r.name;
+  const r = roleMap[role] || roleMap.manager;
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('roleIconBadge', r.icon);
+  set('roleNameDisplay', r.name);
+  set('rolePermsDisplay', r.perms);
+  set('currentRoleInfo', r.name);
+}
+
+// ── Flag عالمي لتفعيل قيود الكاشير في دوال الرندر ──
+let _cashierHideOnRender = false;
+
+// ── تعطيل تعديل تكاليف المتجر للكاشير ──
+const _origEditShopCost = window.editShopCost;
+function editShopCost(el, key) {
+  if (window._shopCostLocked) {
+    showToast(lang==='ar' ? '🔒 الكاشير لا يملك صلاحية التعديل' : '🔒 No permission', true);
+    return;
+  }
+  _origEditShopCost ? _origEditShopCost(el, key) : null;
+}
+
+// ── تعطيل تعديل خلايا المبيعات للكاشير ──
+const _origEditCell = window.editCell;
+function editCell(td, idx, field) {
+  if (_cashierHideOnRender) {
+    showToast(lang==='ar' ? '🔒 الكاشير لا يملك صلاحية التعديل' : '🔒 No permission', true);
+    return;
+  }
+  _origEditCell ? _origEditCell(td, idx, field) : null;
 }
 
 function renderSettingsPage() {
